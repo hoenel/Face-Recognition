@@ -32,3 +32,42 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Laravel & PHP
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+/.idea
+/.vscode
+/.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+.env
+.env.*
+.phpunit.cache
+
+# Laravel 8+ cache
+/bootstrap/cache/*.php
+!bootstrap/cache/.gitignore
+
+# Composer & npm/yarn/pnpm logs
+composer.lock
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Laravel Telescope & Horizon (nếu có dùng)
+telescope/entries/*.sqlite
+horizon/*.sqlite
+
+# PHPUnit
+coverage/
+.phpunit.result.cache
+
+# Logs
+/storage/logs/*.log
