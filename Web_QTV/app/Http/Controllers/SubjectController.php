@@ -11,21 +11,14 @@ class SubjectController extends Controller
 
     public function __construct(FirebaseService $firebaseService)
     {
-        $this->middleware('auth');
         $this->firebaseService = $firebaseService;
     }
 
     public function index()
     {
         try {
-            $subjectsCollection = $this->firebaseService->getAllSubjects();
-            $subjects = [];
-            
-            foreach ($subjectsCollection as $subject) {
-                $subjectData = $subject->data();
-                $subjectData['id'] = $subject->id();
-                $subjects[] = $subjectData;
-            }
+            // Lấy dữ liệu subjects từ mock service
+            $subjects = $this->firebaseService->getAllSubjects();
             
             return view('subjects.index', compact('subjects'));
         } catch (\Exception $e) {

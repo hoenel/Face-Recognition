@@ -11,27 +11,19 @@ class AttendanceController extends Controller
 
     public function __construct(FirebaseService $firebaseService)
     {
-        $this->middleware('auth');
         $this->firebaseService = $firebaseService;
     }
 
     public function index()
     {
         try {
-            $attendancesCollection = $this->firebaseService->getFirestore()
-                ->collection('attendances')
-                ->orderBy('date', 'desc')
-                ->limit(50)
-                ->documents();
+            // Lấy dữ liệu điểm danh từ mock service
+            $attendances = $this->firebaseService->getAllAttendances();
+
+            // Lấy dữ liệu lịch học hôm nay từ mock service
+            $schedules = $this->firebaseService->getAllSchedules();
             
-            $attendances = [];
-            foreach ($attendancesCollection as $attendance) {
-                $attendanceData = $attendance->data();
-                $attendanceData['id'] = $attendance->id();
-                $attendances[] = $attendanceData;
-            }
-            
-            return view('attendances.index', compact('attendances'));
+            return view('attendances.index', compact('attendances', 'schedules'));
         } catch (\Exception $e) {
             return back()->with('error', 'Không thể tải danh sách điểm danh: ' . $e->getMessage());
         }

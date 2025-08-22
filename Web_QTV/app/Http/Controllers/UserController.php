@@ -11,21 +11,14 @@ class UserController extends Controller
 
     public function __construct(FirebaseService $firebaseService)
     {
-        $this->middleware('auth');
         $this->firebaseService = $firebaseService;
     }
 
     public function index()
     {
         try {
-            $usersCollection = $this->firebaseService->getAllUsers();
-            $users = [];
-            
-            foreach ($usersCollection as $user) {
-                $userData = $user->data();
-                $userData['id'] = $user->id();
-                $users[] = $userData;
-            }
+            // Lấy dữ liệu users từ mock service
+            $users = $this->firebaseService->getAllUsers();
             
             return view('users.index', compact('users'));
         } catch (\Exception $e) {

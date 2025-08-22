@@ -11,7 +11,7 @@ class AuthController extends Controller
 {
     protected $firebaseService;
 
-    public function __construct(FirebaseService $firebaseService)
+    public function __construct(FirebaseService $firebaseService = null)
     {
         $this->firebaseService = $firebaseService;
     }
@@ -28,29 +28,36 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        // Tạm thời sử dụng admin account cố định để test UI
-        if ($credentials['email'] === 'admin@example.com' && $credentials['password'] === 'password') {
-            // Đăng nhập thành công, lưu thông tin user vào session
-            Session::put('user', [
-                'id' => 'admin123',
-                'name' => 'Administrator',
-                'email' => 'admin@example.com',
-                'role' => 'admin',
-                'student_id' => null,
-                'phone' => null,
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
             ]);
 
-            Session::regenerate();
+            // Tạm thời sử dụng admin account cố định để test UI
+            if ($credentials['email'] === 'admin@example.com' && $credentials['password'] === 'password') {
+                // Đăng nhập thành công, lưu thông tin user vào session
+                Session::put('user', [
+                    'id' => 'admin123',
+                    'name' => 'Administrator',
+                    'email' => 'admin@example.com',
+                    'role' => 'admin',
+                    'student_id' => null,
+                    'phone' => null,
+                ]);
 
-            return redirect()->intended('dashboard')->with('success', 'Đăng nhập thành công!');
-        } else {
+                Session::regenerate();
+
+                return redirect()->intended('dashboard')->with('success', 'Đăng nhập thành công!');
+            } else {
+                return back()->withErrors([
+                    'email' => 'Email hoặc mật khẩu không chính xác.',
+                ])->withInput($request->only('email'));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Login error: ' . $e->getMessage());
             return back()->withErrors([
-                'email' => 'Email hoặc mật khẩu không chính xác.',
+                'email' => 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.',
             ])->withInput($request->only('email'));
         }
 

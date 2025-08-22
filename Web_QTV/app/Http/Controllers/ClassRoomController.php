@@ -11,23 +11,16 @@ class ClassRoomController extends Controller
 
     public function __construct(FirebaseService $firebaseService)
     {
-        $this->middleware('auth');
         $this->firebaseService = $firebaseService;
     }
 
     public function index()
     {
         try {
-            $classRoomsCollection = $this->firebaseService->getAllClassRooms();
-            $classRooms = [];
+            // Lấy dữ liệu classrooms từ Firebase service
+            $classrooms = $this->firebaseService->getAllClassRooms();
             
-            foreach ($classRoomsCollection as $classRoom) {
-                $classRoomData = $classRoom->data();
-                $classRoomData['id'] = $classRoom->id();
-                $classRooms[] = $classRoomData;
-            }
-            
-            return view('classrooms.index', compact('classRooms'));
+            return view('classrooms.index', compact('classrooms'));
         } catch (\Exception $e) {
             return back()->with('error', 'Không thể tải danh sách lớp học: ' . $e->getMessage());
         }

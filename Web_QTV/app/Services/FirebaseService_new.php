@@ -119,17 +119,6 @@ class FirebaseService
                 'field_of_study' => 'Công nghệ thông tin',
                 'hometown' => 'Hà Nội',
                 'created_at' => now(),
-            ],
-            [
-                'id' => '2151060245',
-                'student_id' => '2151060245',
-                'name' => 'Lê Thị Mai',
-                'class_id' => '63CNTT.VA',
-                'course_enrollments' => 'CSE205, CSE204, MATH333',
-                'date_of_birth' => '15/08/2003',
-                'field_of_study' => 'Công nghệ thông tin',
-                'hometown' => 'Hồ Chí Minh',
-                'created_at' => now(),
             ]
         ];
     }
@@ -172,14 +161,6 @@ class FirebaseService
                 'code' => 'IT4552',
                 'credits' => 3,
                 'description' => 'Môn học về phát triển ứng dụng web',
-                'created_at' => now(),
-            ],
-            [
-                'id' => 'CSDL',
-                'name' => 'Cơ sở dữ liệu',
-                'code' => 'IT3080',
-                'credits' => 3,
-                'description' => 'Môn học về thiết kế và quản lý cơ sở dữ liệu',
                 'created_at' => now(),
             ]
         ];
@@ -228,16 +209,6 @@ class FirebaseService
                 'room' => 'B301',
                 'schedule' => 'Thứ 2, 4, 6 - 7:00-9:25',
                 'students_count' => 35,
-                'created_at' => now(),
-            ],
-            [
-                'id' => '63CNTT.VA',
-                'name' => 'K63 Công nghệ thông tin Việt-Anh',
-                'subject' => 'Công nghệ thông tin',
-                'teacher' => 'TS. Trần Thị B',
-                'room' => 'B302',
-                'schedule' => 'Thứ 3, 5, 7 - 9:30-11:55',
-                'students_count' => 40,
                 'created_at' => now(),
             ]
         ];
