@@ -67,51 +67,50 @@
         <h5>Admin - diem_danh</h5>
     </div>
     <div class="p-3">
-        <ul class="nav flex-column">
+                <ul class="nav flex-column">
             <li class="nav-item">
-                <a href="{{ route('dashboard') }}" class="nav-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-home me-2"></i>Trang chủ
+                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-home me-2"></i>Tổng quan
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('users.index') }}" class="nav-link">
+                <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                     <i class="fas fa-users me-2"></i>Quản lý tài khoản
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('subjects.index') }}" class="nav-link">
+                <a href="{{ route('subjects.index') }}" class="nav-link {{ request()->routeIs('subjects.*') ? 'active' : '' }}">
                     <i class="fas fa-book me-2"></i>Quản lý môn học
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('classrooms.index') }}" class="nav-link">
-                    <i class="fas fa-chalkboard-teacher me-2"></i>Quản lý lớp học
+                <a href="{{ route('classrooms.index') }}" class="nav-link {{ request()->routeIs('classrooms.*') ? 'active' : '' }}">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Quản lý lớp học phần
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('attendances.index') }}" class="nav-link">
+                <a href="{{ route('attendances.index') }}" class="nav-link {{ request()->routeIs('attendances.*') ? 'active' : '' }}">
                     <i class="fas fa-calendar-check me-2"></i>Lịch học & Điểm danh
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('data.index') }}" class="nav-link">
-                    <i class="fas fa-search me-2"></i>Kiểm tra dữ liệu
+                <a href="{{ route('data.index') }}" class="nav-link {{ request()->routeIs('data.*') ? 'active' : '' }}">
+                    <i class="fas fa-database me-2"></i>Kiểm tra dữ liệu
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('reports.index') }}" class="nav-link">
-                    <i class="fas fa-file-export me-2"></i>Xuất báo cáo
+                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                    <i class="fas fa-chart-bar me-2"></i>Xuất báo cáo
                 </a>
             </li>
         </ul>
         
-        <!-- Logout Section -->
+                <!-- Logout Section -->
         <div class="logout-section">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="logout-btn d-flex align-items-center">
-                    <i class="fas fa-sign-out-alt me-2"></i>
-                    Đăng xuất
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
                 </button>
             </form>
         </div>
