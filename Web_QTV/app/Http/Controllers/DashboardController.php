@@ -3,22 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
-        return view('dashboard.index');
+        $user = Session::get('user');
+        return view('dashboard.index', compact('user'));
     }
 
     public function profile()
     {
-        return view('dashboard.profile');
+        $user = Session::get('user');
+        return view('dashboard.profile', compact('user'));
     }
 }
