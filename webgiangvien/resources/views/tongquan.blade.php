@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng quan lớp học</title>
+        <title>Tổng quan lớp học</title>
+    <!-- Firebase SDK đã được import và khởi tạo từ layout -->
     <style>
         body {
             margin: 0;
@@ -67,14 +68,13 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>HTD - Điểm Danh</h2>
-        <a href="#">Tổng quan lớp học</a>
-        <a href="#">Lịch dạy</a>
-        <a href="#">Tạo buổi học</a>
-        <a href="#">Điểm danh</a>
-        <a href="#">Trạng thái điểm danh</a>
-        <a href="#">Thống kê</a>
-        <a href="#">Báo cáo</a>
-        <a href="#">Đăng xuất</a>
+        <a href="{{ route('tongquan') }}">Tổng quan lớp học</a>
+        <a href="{{ route('lich') }}">Lịch giảng dạy</a>
+        <a href="{{ route('taobuoihoc') }}">Tạo buổi học / điểm danh</a>
+        <a href="{{ route('trangthaidiemdanh') }}">Trạng thái điểm danh</a>
+        <a href="{{ route('thongkechuyencan') }}" class="active">Thống kê chuyên cần</a>
+        <a href="{{ route('xuatbaocao') }}">Xuất báo cáo</a>
+        <a href="{{ route('dangnhap') }}">Đăng xuất</a>
     </div>
 
     <!-- Main Content -->
@@ -92,27 +92,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>CNTT2023</td>
-                        <td>Cơ sở dữ liệu</td>
-                        <td>5</td>
-                        <td>30</td>
-                        <td>90%</td>
-                    </tr>
-                    <tr>
-                        <td>CNTT2024</td>
-                        <td>Lập trình Java</td>
-                        <td>4</td>
-                        <td>28</td>
-                        <td>85%</td>
-                    </tr>
-                    <tr>
-                        <td>CNTT2025</td>
-                        <td>Trí tuệ nhân tạo</td>
-                        <td>6</td>
-                        <td>25</td>
-                        <td>88%</td>
-                    </tr>
+                        <!-- Dữ liệu sẽ được đổ từ Firebase -->
+                    </tbody>
+                </table>
+                <script>
+                // Lấy dữ liệu từ Firebase và hiển thị lên bảng
+                document.addEventListener('DOMContentLoaded', function() {
+                    const tbody = document.querySelector('table tbody');
+                    firebase.database().ref('tongquan').on('value', function(snapshot) {
+                        tbody.innerHTML = '';
+                        const data = snapshot.val();
+                        if(data) {
+                            Object.values(data).forEach(function(item) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>${item.malop || ''}</td>
+                                    <td>${item.tenmon || ''}</td>
+                                    <td>${item.sotiet || ''}</td>
+                                    <td>${item.tongsv || ''}</td>
+                                    <td>${item.tyle || ''}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="5">Không có dữ liệu</td></tr>';
+                        }
+                    });
+                });
+                </script>
                 </tbody>
             </table>
         </div>

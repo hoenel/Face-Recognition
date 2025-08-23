@@ -64,6 +64,7 @@
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
+            vertical-align: top;
         }
         th {
             background: #1f2a44;
@@ -75,6 +76,7 @@
             border-radius: 4px;
             margin: 2px 0;
             display: block;
+            font-size: 12px;
         }
         .blue { background: #007bff; }
         .green { background: #28a745; }
@@ -86,14 +88,13 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>HTD - Điểm Danh</h2>
-        <a href="/dashboard">Tổng quan lớp học</a>
-        <a href="/schedule">Lịch giảng dạy</a>
-        <a href="#">Tạo buổi học / Điểm danh</a>
-        <a href="#">Điểm danh lớp học</a>
-        <a href="#">Trạng thái điểm danh</a>
-        <a href="#">Thống kê chuyên cần</a>
-        <a href="#">Xuất báo cáo</a>
-        <a href="#">Đăng xuất</a>
+        <a href="{{ route('tongquan') }}">Tổng quan lớp học</a>
+        <a href="{{ route('lich') }}" class="active">Lịch giảng dạy</a>
+        <a href="{{ route('taobuoihoc') }}">Tạo buổi học / điểm danh</a>
+        <a href="{{ route('trangthaidiemdanh') }}">Trạng thái điểm danh</a>
+        <a href="{{ route('thongkechuyencan') }}">Thống kê chuyên cần</a>
+        <a href="{{ route('xuatbaocao') }}">Xuất báo cáo</a>
+        <a href="{{ route('dangnhap') }}">Đăng xuất</a>
     </div>
 
     <!-- Main Content -->
@@ -103,20 +104,23 @@
 
             <!-- Bộ lọc -->
             <div class="filters">
-                <select>
-                    <option>Lớp: CNTT2023</option>
-                    <option>Lớp: CNTT2024</option>
+                <select id="filter-class">
+                    <option value="">-- Chọn lớp --</option>
+                    <option value="63CNTT.NB">63CNTT.NB</option>
+                    <option value="63CNTT1">63CNTT1</option>
                 </select>
-                <select>
-                    <option>Môn học: CSDL</option>
-                    <option>Môn học: Java</option>
+                <select id="filter-course">
+                    <option value="">-- Chọn môn học --</option>
+                    <option value="MATH111">Giải tích</option>
+                    <option value="CSE441">Phát triển ứng dụng di động</option>
                 </select>
-                <input type="date">
-                <select>
-                    <option>Học kỳ 1</option>
-                    <option>Học kỳ 2</option>
+                <input type="date" id="filter-date">
+                <select id="filter-term">
+                    <option value="">-- Học kỳ --</option>
+                    <option value="1">Học kỳ 1</option>
+                    <option value="2">Học kỳ 2</option>
                 </select>
-                <button>Lọc</button>
+                <button id="filter-btn">Lọc</button>
             </div>
 
             <!-- Bảng lịch -->
@@ -132,38 +136,110 @@
                         <th>CN</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>6</td>
-                        <td>7</td>
-                        <td>8</td>
-                        <td>9</td>
-                        <td>10</td>
-                        <td>11</td>
-                        <td>12</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="event blue">Java - P301</span>
-                        </td>
-                        <td>
-                            <span class="event green">CSDL - P302</span>
-                        </td>
-                        <td>
-                            <span class="event orange">AI - P303</span>
-                        </td>
-                        <td>
-                            <span class="event red">Python - P304</span>
-                        </td>
-                        <td></td>
-                        <td>
-                            <span class="event blue">Web - P305</span>
-                        </td>
-                        <td></td>
-                    </tr>
+                <tbody id="calendar-body">
+                    <!-- Dữ liệu sẽ được đổ từ Firestore -->
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
+    <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAygULXRSt9Nsqy2rb9Z4NNvh4Z4KvdK7c",
+        authDomain: "facerecognitionapp-f034d.firebaseapp.com",
+        projectId: "facerecognitionapp-f034d",
+        storageBucket: "facerecognitionapp-f034d.firebasestorage.app",
+        messagingSenderId: "1042946521446",
+        appId: "1:1042946521446:web:02de5802629d422a5330a7"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Hàm chuyển ngày sang thứ
+    function getDayOfWeek(dateStr) {
+        const days = ['T2','T3','T4','T5','T6','T7','CN'];
+        const match = dateStr.match(/Thứ\s*(\d)/);
+        if(match) {
+            let idx = parseInt(match[1],10)-2;
+            return idx >=0 && idx < 7 ? days[idx] : null;
+        }
+        return null;
+    }
+
+    async function loadSchedule(filters = {}) {
+        const calendarBody = document.getElementById('calendar-body');
+        calendarBody.innerHTML = '';
+
+        let dayRow = document.createElement('tr');
+        let eventRow = document.createElement('tr');
+
+        let daysArr = ['','','','','','','']; // để trống, có thể thêm số ngày sau
+        daysArr.forEach(day => {
+            let td = document.createElement('td');
+            td.textContent = day;
+            dayRow.appendChild(td);
+        });
+
+        let events = [[],[],[],[],[],[],[]];
+
+        const snapshot = await db.collection("schedules").get();
+        snapshot.forEach(doc => {
+            const scheduleDoc = doc.data();
+            if(scheduleDoc.schedule_sessions) {
+                Object.values(scheduleDoc.schedule_sessions).forEach(item => {
+                    // Áp dụng filter
+                    if(filters.classId && item.class_id !== filters.classId) return;
+                    if(filters.courseCode && item.course_code !== filters.courseCode) return;
+                    if(filters.date && !item.date.includes(filters.date)) return;
+
+                    const dayOfWeek = getDayOfWeek(item.date || '');
+                    const dayIdx = ['T2','T3','T4','T5','T6','T7','CN'].indexOf(dayOfWeek);
+                    if(dayIdx >=0) {
+                        let colorClass = 'blue';
+                        if(item.course_name && item.course_name.toLowerCase().includes('csdl')) colorClass = 'green';
+                        else if(item.course_name && item.course_name.toLowerCase().includes('ai')) colorClass = 'orange';
+                        else if(item.course_name && item.course_name.toLowerCase().includes('python')) colorClass = 'red';
+                        events[dayIdx].push(
+                            `<span class="event ${colorClass}">
+                                ${item.course_name || ''}<br>
+                                ${item.classroom || ''}<br>
+                                ${item.start_time || ''}
+                            </span>`
+                        );
+                    }
+                });
+            }
+        });
+
+        events.forEach(evArr => {
+            let td = document.createElement('td');
+            td.innerHTML = evArr.join('');
+            eventRow.appendChild(td);
+        });
+
+        calendarBody.appendChild(dayRow);
+        calendarBody.appendChild(eventRow);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSchedule();
+
+        document.getElementById('filter-btn').addEventListener('click', function() {
+            const filters = {
+                classId: document.getElementById('filter-class').value,
+                courseCode: document.getElementById('filter-course').value,
+                date: document.getElementById('filter-date').value ? 
+                      document.getElementById('filter-date').value.split('-').reverse().join('/') : ''
+            };
+            loadSchedule(filters);
+        });
+    });
+    </script>
 </body>
 </html>
+<!DOCTYPE html>

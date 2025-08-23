@@ -18,11 +18,23 @@ Route::get('/', function () {
 });
 Route::get('/dangnhap', function () {
     return view('dangnhap');
-});
+})->name('dangnhap');
 
 Route::get('/tongquan', function () {
     return view('tongquan');
-});
+})->name('tongquan');
 Route::get('/lich', function () {
     return view('lich');
-});
+})->name('lich');
+Route::get('/taobuoihoc', function () {
+    return view('taobuoihoc');
+})->name('taobuoihoc');
+Route::get('/trangthaidiemdanh', function () {
+    return view('trangthaidiemdanh');
+})->name('trangthaidiemdanh');
+Route::get('/thongkechuyencan', function () {
+    return view('thongkechuyencan');
+})->name('thongkechuyencan');
+Route::get('/xuatbaocao', function () {
+    return view('xuatbaocao');
+})->name('xuatbaocao');

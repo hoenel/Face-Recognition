@@ -51,13 +51,45 @@
 </head>
 <body>
     <div class="login-box">
-        <h2>Đăng nhập</h2>
-        <form action="/login" method="POST">
-            @csrf
-            <input type="text" name="username" placeholder="Tên đăng nhập" required>
-            <input type="password" name="password" placeholder="Mật khẩu" required>
-            <button type="submit">Đăng nhập</button>
-        </form>
+    <h2>Đăng nhập</h2>
+    <input type="text" id="email" placeholder="Email đăng nhập" required class="form-control mb-2">
+    <input type="password" id="password" placeholder="Mật khẩu" required class="form-control mb-2">
+    <button type="button" class="btn btn-primary w-100" onclick="loginFirebase()">Đăng nhập</button>
     </div>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAygULXRSt9Nsqy2rb9Z4NNvh4Z4KvdK7c",
+        authDomain: "facerecognitionapp-f034d.firebaseapp.com",
+        databaseURL: "https://facerecognitionapp-f034d-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "facerecognitionapp-f034d",
+        storageBucket: "facerecognitionapp-f034d.firebasestorage.app",
+        messagingSenderId: "1042946521446",
+        appId: "1:1042946521446:web:02de5802629d422a5330a7"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    function loginFirebase() {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const password = document.getElementById('password').value.trim();
+        if (!email || !password) {
+            alert('Vui lòng nhập đầy đủ thông tin!');
+            return;
+        }
+        db.collection('users').doc('2FLgrE6Xz7bksTdbps1HJfc3y383').get().then(function(doc) {
+            const user = doc.exists ? doc.data() : null;
+            const dbEmail = (user && user.email) ? user.email.trim().toLowerCase() : '';
+            console.log('Firestore user:', user);
+            console.log('Email nhập:', email);
+            console.log('Email trong DB:', dbEmail);
+            if (user && dbEmail === email && password === 'giangvien123') {
+                window.location.href = "{{ route('tongquan') }}";
+            } else {
+                alert('Email hoặc mật khẩu không đúng!');
+            }
+        });
+    }
+    </script>
 </body>
 </html>
