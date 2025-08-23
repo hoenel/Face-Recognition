@@ -3,27 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\FirebaseService;
+use App\Models\User;
 
 class UserController extends Controller
 {
-    protected $firebaseService;
-
-    public function __construct(FirebaseService $firebaseService)
+    public function __construct()
     {
-        $this->firebaseService = $firebaseService;
+        $this->middleware('auth');
     }
 
     public function index()
     {
-        try {
-            // Lấy dữ liệu users từ mock service
-            $users = $this->firebaseService->getAllUsers();
-            
-            return view('users.index', compact('users'));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Không thể tải danh sách người dùng: ' . $e->getMessage());
-        }
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
     }
 
     public function create()
@@ -35,86 +27,42 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
             'role' => 'required|in:admin,teacher,student',
-            'student_id' => 'nullable|string',
-            'phone' => 'nullable|string',
         ]);
 
-        try {
-            $userData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'role' => $request->role,
-                'student_id' => $request->student_id,
-                'phone' => $request->phone,
-                'face_data' => null,
-                'created_at' => new \DateTime(),
-                'updated_at' => new \DateTime(),
-            ];
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+        ]);
 
-            $this->firebaseService->createUser($userData);
-
-            return redirect()->route('users.index')->with('success', 'Tài khoản đã được tạo thành công!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Không thể tạo tài khoản: ' . $e->getMessage());
-        }
+        return redirect()->route('users.index')->with('success', 'Tài khoản đã được tạo thành công!');
     }
 
-    public function edit($userId)
+    public function edit(User $user)
     {
-        try {
-            $userDoc = $this->firebaseService->getUser($userId);
-            if (!$userDoc->exists()) {
-                return redirect()->route('users.index')->with('error', 'Không tìm thấy người dùng!');
-            }
-            
-            $user = $userDoc->data();
-            $user['id'] = $userDoc->id();
-            
-            return view('users.edit', compact('user'));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Không thể tải thông tin người dùng: ' . $e->getMessage());
-        }
+        return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, $userId)
+    public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,teacher,student',
-            'student_id' => 'nullable|string',
-            'phone' => 'nullable|string',
         ]);
 
-        try {
-            $updateData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'role' => $request->role,
-                'student_id' => $request->student_id,
-                'phone' => $request->phone,
-                'updated_at' => new \DateTime(),
-            ];
+        $user->update($request->only(['name', 'email', 'role']));
 
-            $this->firebaseService->updateUser($userId, $updateData);
-
-            return redirect()->route('users.index')->with('success', 'Tài khoản đã được cập nhật!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Không thể cập nhật tài khoản: ' . $e->getMessage());
-        }
+        return redirect()->route('users.index')->with('success', 'Tài khoản đã được cập nhật!');
     }
 
-    public function destroy($userId)
+    public function destroy(User $user)
     {
-        try {
-            $this->firebaseService->deleteUser($userId);
-            return redirect()->route('users.index')->with('success', 'Tài khoản đã được xóa!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Không thể xóa tài khoản: ' . $e->getMessage());
-        }
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'Tài khoản đã được xóa!');
     }
 }
