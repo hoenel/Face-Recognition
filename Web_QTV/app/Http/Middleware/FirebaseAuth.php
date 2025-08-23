@@ -10,7 +10,7 @@ class FirebaseAuth
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Session::has('user')) {
+        if (!Session::has('user_id')) {
             return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
         }
 

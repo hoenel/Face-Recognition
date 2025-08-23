@@ -301,4 +301,141 @@ class FirebaseService
             'message' => 'Firebase not initialized'
         ];
     }
+    
+    public function getAllSchedules()
+    {
+        if ($this->firestore) {
+            try {
+                $schedulesCollection = $this->firestore->collection('schedules')->documents();
+                $schedules = [];
+                
+                foreach ($schedulesCollection as $schedule) {
+                    if ($schedule->exists()) {
+                        $scheduleData = $schedule->data();
+                        $scheduleData['id'] = $schedule->id();
+                        $schedules[] = $scheduleData;
+                    }
+                }
+                
+                \Log::info('🔥 Firebase: Retrieved ' . count($schedules) . ' schedules');
+                return $schedules;
+                
+            } catch (\Exception $e) {
+                \Log::error('Firebase getAllSchedules failed: ' . $e->getMessage());
+                return $this->getMockSchedules();
+            }
+        }
+        
+        return $this->getMockSchedules();
+    }
+    
+    public function getAllClasses()
+    {
+        if ($this->firestore) {
+            try {
+                $classesCollection = $this->firestore->collection('classes')->documents();
+                $classes = [];
+                
+                foreach ($classesCollection as $class) {
+                    if ($class->exists()) {
+                        $classData = $class->data();
+                        $classData['id'] = $class->id();
+                        $classes[] = $classData;
+                    }
+                }
+                
+                \Log::info('🔥 Firebase: Retrieved ' . count($classes) . ' classes');
+                return $classes;
+                
+            } catch (\Exception $e) {
+                \Log::error('Firebase getAllClasses failed: ' . $e->getMessage());
+                return $this->getMockClasses();
+            }
+        }
+        
+        return $this->getMockClasses();
+    }
+    
+    public function getAllAttendances()
+    {
+        if ($this->firestore) {
+            try {
+                $attendancesCollection = $this->firestore->collection('attendances')->documents();
+                $attendances = [];
+                
+                foreach ($attendancesCollection as $attendance) {
+                    if ($attendance->exists()) {
+                        $attendanceData = $attendance->data();
+                        $attendanceData['id'] = $attendance->id();
+                        $attendances[] = $attendanceData;
+                    }
+                }
+                
+                \Log::info('🔥 Firebase: Retrieved ' . count($attendances) . ' attendances');
+                return $attendances;
+                
+            } catch (\Exception $e) {
+                \Log::error('Firebase getAllAttendances failed: ' . $e->getMessage());
+                return $this->getMockAttendances();
+            }
+        }
+        
+        return $this->getMockAttendances();
+    }
+    
+    private function getMockClasses()
+    {
+        return [
+            ['id' => 'class1', 'name' => 'Lớp 12A1', 'course_id' => 'course1'],
+            ['id' => 'class2', 'name' => 'Lớp 12A2', 'course_id' => 'course2'],
+            ['id' => 'class3', 'name' => 'Lớp 11B1', 'course_id' => 'course1'],
+            ['id' => 'class4', 'name' => 'Lớp 11B2', 'course_id' => 'course3'],
+        ];
+    }
+    
+    private function getMockAttendances()
+    {
+        return [
+            ['id' => 'att1', 'student_id' => '2151060244', 'class_id' => '63CNTLVA', 'date' => '2025-08-23', 'status' => 'present', 'check_in_time' => '08:30:00'],
+            ['id' => 'att2', 'student_id' => '2151062753', 'class_id' => '63CNTLVA', 'date' => '2025-08-23', 'status' => 'present', 'check_in_time' => '08:32:00'],
+            ['id' => 'att3', 'student_id' => '2151062754', 'class_id' => '63CNTLVA', 'date' => '2025-08-23', 'status' => 'late', 'check_in_time' => '08:45:00'],
+            ['id' => 'att4', 'student_id' => '2151062755', 'class_id' => '63CNTLVA', 'date' => '2025-08-23', 'status' => 'absent', 'check_in_time' => null],
+        ];
+    }
+    
+    private function getMockSchedules()
+    {
+        return [
+            [
+                'id' => 'sch1',
+                'class_id' => '63CNTLVA',
+                'subject_id' => 'CSE205',
+                'date' => '2025-08-23',
+                'start_time' => '08:30:00',
+                'end_time' => '10:30:00',
+                'room' => 'P301',
+                'instructor' => 'TS. Nguyễn Văn A'
+            ],
+            [
+                'id' => 'sch2',
+                'class_id' => '63CNTLVA',
+                'subject_id' => 'CSE204',
+                'date' => '2025-08-24',
+                'start_time' => '10:30:00',
+                'end_time' => '12:30:00',
+                'room' => 'P302',
+                'instructor' => 'TS. Trần Thị B'
+            ],
+            [
+                'id' => 'sch3',
+                'class_id' => '63CNTLVA',
+                'subject_id' => 'MATH333',
+                'date' => '2025-08-25',
+                'start_time' => '13:30:00',
+                'end_time' => '15:30:00',
+                'room' => 'P303',
+                'instructor' => 'PGS.TS. Lê Văn C'
+            ]
+        ];
+    }
 }

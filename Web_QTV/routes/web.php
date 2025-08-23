@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SubjectController;
@@ -44,26 +43,83 @@ Route::post('/logout', function () {
     return redirect('/')->with('success', 'Đăng xuất thành công!');
 })->name('logout');
 
-// Protected routes
+// Protected routes - 8 màng hình chính
 Route::middleware('web')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // 1. Dashboard (Tổng quan)
+    Route::get('/dashboard', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(DashboardController::class)->index();
+    })->name('dashboard');
     
-    // User Management
-    Route::resource('users', UserController::class);
+    // 2. Quản lý tài khoản
+    Route::get('/users', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(UserController::class)->index();
+    })->name('users.index');
     
-    // Subject Management
-    Route::resource('subjects', SubjectController::class);
+    // 3. Quản lý môn học
+    Route::get('/subjects', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(SubjectController::class)->index();
+    })->name('subjects.index');
     
-    // ClassRoom Management
-    Route::resource('classrooms', ClassRoomController::class);
+    // 4. Quản lý lớp học phần
+    Route::get('/classrooms', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(ClassRoomController::class)->index();
+    })->name('classrooms.index');
     
-    // Attendance Management
-    Route::resource('attendances', AttendanceController::class);
+    // 5. Lịch học và điểm danh (READ-ONLY)
+    Route::get('/attendances', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(AttendanceController::class)->index();
+    })->name('attendances.index');
     
-    // Data Management
-    Route::get('/data', [DataController::class, 'index'])->name('data.index');
+    // API routes cho attendance
+    Route::get('/api/attendances/class/{classId}', function($classId) {
+        if (!session('user_id')) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        return app(AttendanceController::class)->getAttendancesByClass($classId);
+    })->name('api.attendances.by_class');
     
-    // Reports
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/api/attendances/date/{date}', function($date) {
+        if (!session('user_id')) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        return app(AttendanceController::class)->getAttendancesByDate($date);
+    })->name('api.attendances.by_date');
+    
+    Route::get('/attendances/export', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(AttendanceController::class)->exportAttendances(request());
+    })->name('attendances.export');
+    
+    // 6. Kiểm tra dữ liệu
+    Route::get('/data', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(DataController::class)->index();
+    })->name('data.index');
+    
+    // 7. Xuất báo cáo
+    Route::get('/reports', function() {
+        if (!session('user_id')) {
+            return redirect('/login')->with('error', 'Vui lòng đăng nhập');
+        }
+        return app(ReportController::class)->index();
+    })->name('reports.index');
 });
