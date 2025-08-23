@@ -6,3 +6,4 @@
 20/8: Nhóm làm việc với nhánh riêng và push code lên github
 <img width="1459" height="937" alt="image" src="https://github.com/user-attachments/assets/d4604e89-c989-4c44-93ae-69b272345c18" />
 21/8: Nhóm bàn và sửa database structure.
+23/8: lỗi crash của web quản trị viên do cài đặt phiên bản php mới nhất, không hỗ trợ kết nối firebase
