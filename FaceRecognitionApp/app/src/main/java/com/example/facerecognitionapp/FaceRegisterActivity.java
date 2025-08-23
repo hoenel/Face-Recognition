@@ -17,7 +17,6 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -71,7 +70,7 @@ public class FaceRegisterActivity extends AppCompatActivity {
     }
 
     private void requestCameraPermission() {
-        ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, CAMERA_REQUEST_CODE);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
     }
 
     @Override
@@ -114,12 +113,13 @@ public class FaceRegisterActivity extends AppCompatActivity {
                 cameraProvider.unbindAll();
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
 
+                Log.d("DEBUG", "Camera đã khởi động thành công!");
+
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
     }
-
 
     private void takePhoto() {
         if (imageCapture == null) return;
@@ -128,30 +128,42 @@ public class FaceRegisterActivity extends AppCompatActivity {
                 new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(@NonNull ImageProxy image) {
+                        Log.d("DEBUG", "Ảnh chụp thành công!");
                         Bitmap bitmap = imageProxyToBitmap(image);
-                        image.close();
 
                         if (bitmap == null) {
+                            Log.e("DEBUG", "Bitmap null!");
                             runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Lỗi lấy ảnh", Toast.LENGTH_SHORT).show());
+                            image.close();
                             return;
                         }
+
+                        Log.d("DEBUG", "Đã convert Bitmap, size=" + bitmap.getWidth() + "x" + bitmap.getHeight());
 
                         // Detect face (ML Kit) and crop
                         Bitmap face = FaceAnalyzer.detectFace(bitmap, FaceRegisterActivity.this);
                         if (face == null) {
+                            Log.e("DEBUG", "Không tìm thấy khuôn mặt!");
                             runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Không tìm thấy khuôn mặt!", Toast.LENGTH_SHORT).show());
+                            image.close();
                             return;
                         }
+
+                        Log.d("DEBUG", "Đã crop được mặt!");
 
                         // Get embedding (tflite)
                         float[] embedding = FaceEmbeddingHelper.getFaceEmbedding(face, FaceRegisterActivity.this);
                         if (embedding == null) {
+                            Log.e("DEBUG", "Embedding null!");
                             runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Lỗi sinh vector!", Toast.LENGTH_SHORT).show());
+                            image.close();
                             return;
                         }
 
-                        // Save to Firestore
+                        Log.d("DEBUG", "Đã tạo được embedding, bắt đầu lưu Firestore...");
                         saveEmbeddingToFirestore(embedding);
+
+                        image.close();
                     }
 
                     @Override
@@ -183,8 +195,14 @@ public class FaceRegisterActivity extends AppCompatActivity {
                         if (studentId != null && !studentId.isEmpty()) {
                             db.collection("students").document(studentId)
                                     .update("vector_embedding", list)
-                                    .addOnSuccessListener(aVoid -> runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Đăng ký khuôn mặt thành công!", Toast.LENGTH_SHORT).show()))
-                                    .addOnFailureListener(e -> runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Lỗi lưu vector: " + e.getMessage(), Toast.LENGTH_SHORT).show()));
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("DEBUG", "Đăng ký khuôn mặt thành công!");
+                                        runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Đăng ký khuôn mặt thành công!", Toast.LENGTH_SHORT).show());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("DEBUG", "Lỗi lưu vector: " + e.getMessage());
+                                        runOnUiThread(() -> Toast.makeText(FaceRegisterActivity.this, "Lỗi lưu vector: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                    });
                         } else {
                             runOnUiThread(() -> Toast.makeText(this, "Không tìm thấy student_id ở users!", Toast.LENGTH_SHORT).show());
                         }
@@ -196,36 +214,50 @@ public class FaceRegisterActivity extends AppCompatActivity {
     }
 
     /**
-     * Convert ImageProxy (YUV_420_888) to Bitmap using NV21 -> JPEG conversion.
+     * Convert ImageProxy (YUV_420_888 or JPEG) to Bitmap
      */
     private Bitmap imageProxyToBitmap(ImageProxy image) {
         try {
-            ImageProxy.PlaneProxy[] planes = image.getPlanes();
-            ByteBuffer yBuffer = planes[0].getBuffer();
-            ByteBuffer uBuffer = planes[1].getBuffer();
-            ByteBuffer vBuffer = planes[2].getBuffer();
+            if (image.getFormat() == ImageFormat.YUV_420_888) {
+                ImageProxy.PlaneProxy yPlane = image.getPlanes()[0];
+                ImageProxy.PlaneProxy uPlane = image.getPlanes()[1];
+                ImageProxy.PlaneProxy vPlane = image.getPlanes()[2];
 
-            int ySize = yBuffer.remaining();
-            int uSize = uBuffer.remaining();
-            int vSize = vBuffer.remaining();
+                int ySize = yPlane.getBuffer().remaining();
+                int uSize = uPlane.getBuffer().remaining();
+                int vSize = vPlane.getBuffer().remaining();
 
-            byte[] nv21 = new byte[ySize + uSize + vSize];
+                byte[] nv21 = new byte[ySize + uSize + vSize];
 
-            // copy Y
-            yBuffer.get(nv21, 0, ySize);
+                yPlane.getBuffer().get(nv21, 0, ySize);
 
-            // V and U are swapped
-            vBuffer.get(nv21, ySize, vSize);
-            uBuffer.get(nv21, ySize + vSize, uSize);
+                int uOffset = ySize;
+                for (int i = 0; i < uPlane.getBuffer().remaining(); i += uPlane.getPixelStride()) {
+                    nv21[uOffset++] = uPlane.getBuffer().get(i);
+                }
 
-            YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            yuvImage.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 100, out);
-            byte[] jpegBytes = out.toByteArray();
-            return android.graphics.BitmapFactory.decodeByteArray(jpegBytes, 0, jpegBytes.length);
+                int vOffset = ySize + uSize;
+                for (int i = 0; i < vPlane.getBuffer().remaining(); i += vPlane.getPixelStride()) {
+                    nv21[vOffset++] = vPlane.getBuffer().get(i);
+                }
+
+                YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                yuvImage.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 100, out);
+                byte[] jpegBytes = out.toByteArray();
+                return android.graphics.BitmapFactory.decodeByteArray(jpegBytes, 0, jpegBytes.length);
+
+            } else if (image.getFormat() == ImageFormat.JPEG) {
+                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                byte[] bytes = new byte[buffer.remaining()];
+                buffer.get(bytes);
+                return android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            }
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("DEBUG", "Lỗi convert ImageProxy -> Bitmap: " + e.getMessage());
             return null;
         }
+        return null;
     }
 }
