@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.facerecognitionapp.FaceRegisterActivity;
 import com.example.facerecognitionapp.FeedbackActivity;
 import com.example.facerecognitionapp.LoginActivity;
 import com.example.facerecognitionapp.R;
@@ -60,6 +61,13 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getActivity(), "Đã đăng xuất tài khoản!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getActivity(), LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
                 getActivity().finish();
+            }
+        });
+
+        item_face_register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), FaceRegisterActivity.class));
             }
         });
 
