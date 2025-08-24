@@ -41,7 +41,7 @@ class FirebaseService
                             'code' => $docData['course_code'] ?? '',
                             'name' => $docData['course_name'] ?? '',
                             'teacher' => $docData['teacher_name'] ?? '',
-                            'credits' => $this->getCreditsFromCourseCode($docData['course_code'] ?? ''),
+                            'credits' => $docData['credit'] ?? 3, // Sử dụng field credit thực từ Firebase
                             'department' => $this->getDepartmentFromCourseCode($docData['course_code'] ?? ''),
                             'status' => 'active'
                         ];

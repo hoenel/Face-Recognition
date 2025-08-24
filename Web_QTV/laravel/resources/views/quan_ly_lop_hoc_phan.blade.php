@@ -74,7 +74,7 @@
                         <tr>
                             <td><strong>{{ $class['code'] }}</strong></td>
                             <td>{{ $class['subject'] }}</td>
-                            <td>{{ $class['teacher'] }}</td>
+                            <td>{{ $class['instructor'] }}</td>
                             <td>{{ $class['room'] }}</td>
                             <td>{{ $class['schedule'] }}</td>
                             <td><span class="badge bg-info">{{ $class['students'] }}</span></td>
