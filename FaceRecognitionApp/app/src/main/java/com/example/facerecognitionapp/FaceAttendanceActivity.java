@@ -33,17 +33,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class FaceRegisterActivity extends AppCompatActivity {
-    private static final int CAMERA_REQUEST_CODE = 123;
+
+public class FaceAttendanceActivity extends AppCompatActivity {
+
+    private static final double SIMILARITY_THRESHOLD = 0.85;
 
     private PreviewView previewView;
     private ImageView capturedImage;
     private Button btnCapture, btnConfirm, btnRetake;
-
     private ProgressBar progressBar;
     private ImageCapture imageCapture;
     private FirebaseFirestore db;
@@ -52,6 +52,7 @@ public class FaceRegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Tái sử dụng layout của màn hình đăng ký
         setContentView(R.layout.activity_face_register);
 
         previewView = findViewById(R.id.previewView);
@@ -63,44 +64,136 @@ public class FaceRegisterActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        if (checkCameraPermission()) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
-            requestCameraPermission();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 123);
         }
 
         setupButtonClickListeners();
     }
 
     private void setupButtonClickListeners() {
-        btnCapture.setOnClickListener(v -> {
-            if (imageCapture != null) {
-                takePhoto();
-            } else {
-                Toast.makeText(this, "Camera chưa sẵn sàng", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        btnCapture.setOnClickListener(v -> takePhoto());
         btnRetake.setOnClickListener(v -> resetToPreviewState());
-
         btnConfirm.setOnClickListener(v -> {
             if (capturedBitmap != null) {
                 showProcessingUI(true);
-                new Thread(this::processAndSaveImage).start();
+                new Thread(this::processAndCompareImage).start();
             }
         });
     }
 
-    private void showProcessingUI(boolean isProcessing) {
-        if (isProcessing) {
-            progressBar.setVisibility(View.VISIBLE);
-            btnConfirm.setVisibility(View.GONE);
-            btnRetake.setVisibility(View.GONE);
-        } else {
-            progressBar.setVisibility(View.GONE);
-            btnConfirm.setVisibility(View.VISIBLE);
-            btnRetake.setVisibility(View.VISIBLE);
+    private void processAndCompareImage() {
+        if (capturedBitmap == null) return;
+
+        Bitmap face = FaceAnalyzer.detectFace(capturedBitmap, this);
+        if (face == null) {
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Không tìm thấy khuôn mặt! Vui lòng chụp lại.", Toast.LENGTH_LONG).show();
+                resetToPreviewState();
+                showProcessingUI(false);
+            });
+            return;
         }
+
+        float[] currentEmbedding = FaceEmbeddingHelper.getFaceEmbedding(face, this);
+        if (currentEmbedding == null) {
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Lỗi sinh vector!", Toast.LENGTH_SHORT).show();
+                showProcessingUI(false);
+            });
+            return;
+        }
+
+        fetchStoredEmbeddingAndCompare(currentEmbedding);
+    }
+
+    private void fetchStoredEmbeddingAndCompare(float[] currentEmbedding) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            runOnUiThread(() -> Toast.makeText(this, "Bạn chưa đăng nhập!", Toast.LENGTH_SHORT).show());
+            return;
+        }
+
+        String uid = currentUser.getUid();
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(userDoc -> {
+                    if (userDoc.exists()) {
+                        String studentId = userDoc.getString("student_id");
+                        if (studentId != null && !studentId.isEmpty()) {
+                            db.collection("students").document(studentId).get()
+                                    .addOnSuccessListener(studentDoc -> {
+                                        if (studentDoc.exists()) {
+                                            // Firestore lưu danh sách số thực dưới dạng List<Double>
+                                            List<Double> storedEmbeddingList = (List<Double>) studentDoc.get("vector_embedding");
+                                            if (storedEmbeddingList != null && !storedEmbeddingList.isEmpty()) {
+                                                compareEmbeddings(currentEmbedding, storedEmbeddingList);
+                                            } else {
+                                                runOnUiThread(() -> {
+                                                    Toast.makeText(this, "Chưa đăng ký khuôn mặt!", Toast.LENGTH_SHORT).show();
+                                                    finish();
+                                                });
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> runOnUiThread(() -> Toast.makeText(this, "Lỗi lấy dữ liệu sinh viên.", Toast.LENGTH_SHORT).show()));
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> runOnUiThread(() -> Toast.makeText(this, "Lỗi lấy dữ liệu người dùng.", Toast.LENGTH_SHORT).show()));
+    }
+
+    private void compareEmbeddings(float[] currentEmbedding, List<Double> storedEmbeddingList) {
+        float[] storedEmbedding = new float[storedEmbeddingList.size()];
+        for (int i = 0; i < storedEmbeddingList.size(); i++) {
+            storedEmbedding[i] = storedEmbeddingList.get(i).floatValue();
+        }
+
+        double similarity = calculateCosineSimilarity(currentEmbedding, storedEmbedding);
+
+        runOnUiThread(() -> {
+            if (similarity > SIMILARITY_THRESHOLD) {
+                Toast.makeText(this, "Điểm danh thành công!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Ảnh không khớp! Vui lòng thử lại. Độ tương đồng: " + String.format("%.2f", similarity), Toast.LENGTH_LONG).show();
+            }
+            finish(); // Đóng activity sau khi có kết quả
+        });
+    }
+
+    /**
+     * Tính toán độ tương đồng Cosine giữa hai vector.
+     * Kết quả trả về trong khoảng [-1, 1]. Càng gần 1 càng giống nhau.
+     */
+    private double calculateCosineSimilarity(float[] vectorA, float[] vectorB) {
+        if (vectorA == null || vectorB == null || vectorA.length != vectorB.length) {
+            return 0.0;
+        }
+
+        double dotProduct = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+        for (int i = 0; i < vectorA.length; i++) {
+            dotProduct += vectorA[i] * vectorB[i];
+            normA += Math.pow(vectorA[i], 2);
+            normB += Math.pow(vectorB[i], 2);
+        }
+
+        if (normA == 0 || normB == 0) {
+            return 0.0;
+        }
+
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+
+    private void showProcessingUI(boolean isProcessing) {
+        runOnUiThread(() -> {
+            progressBar.setVisibility(isProcessing ? View.VISIBLE : View.GONE);
+            btnConfirm.setVisibility(isProcessing ? View.GONE : View.VISIBLE);
+            btnRetake.setVisibility(isProcessing ? View.GONE : View.VISIBLE);
+        });
     }
 
     private void resetToPreviewState() {
@@ -110,27 +203,6 @@ public class FaceRegisterActivity extends AppCompatActivity {
         btnConfirm.setVisibility(View.GONE);
         btnRetake.setVisibility(View.GONE);
         capturedBitmap = null;
-    }
-
-    private boolean checkCameraPermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestCameraPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCamera();
-            } else {
-                Toast.makeText(this, "Bạn cần cấp quyền camera để đăng ký khuôn mặt", Toast.LENGTH_LONG).show();
-                finish();
-            }
-        }
     }
 
     private void startCamera() {
@@ -158,12 +230,10 @@ public class FaceRegisterActivity extends AppCompatActivity {
                 Bitmap unrotatedBitmap = imageProxyToBitmap(image);
                 int rotationDegrees = image.getImageInfo().getRotationDegrees();
                 image.close();
-
                 if (unrotatedBitmap == null) {
-                    Toast.makeText(FaceRegisterActivity.this, "Lỗi lấy ảnh", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FaceAttendanceActivity.this, "Lỗi lấy ảnh", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 Bitmap rotatedBitmap = rotateBitmap(unrotatedBitmap, rotationDegrees);
                 capturedBitmap = flipBitmapHorizontal(rotatedBitmap);
 
@@ -194,107 +264,18 @@ public class FaceRegisterActivity extends AppCompatActivity {
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-    private void processAndSaveImage() {
-        if (capturedBitmap == null) {
-            runOnUiThread(() -> showProcessingUI(false));
-            return;
-        }
-
-        Bitmap face = FaceAnalyzer.detectFace(capturedBitmap, this);
-        if (face == null) {
-            runOnUiThread(() -> {
-                Toast.makeText(FaceRegisterActivity.this, "Không tìm thấy khuôn mặt! Vui lòng chụp lại.", Toast.LENGTH_LONG).show();
-                showProcessingUI(false);
-            });
-            return;
-        }
-
-        float[] embedding = FaceEmbeddingHelper.getFaceEmbedding(face, this);
-        if (embedding == null) {
-            runOnUiThread(() -> {
-                Toast.makeText(FaceRegisterActivity.this, "Lỗi sinh vector!", Toast.LENGTH_SHORT).show();
-                showProcessingUI(false);
-            });
-            return;
-        }
-
-        saveEmbeddingToFirestore(embedding);
-    }
-
-    private void saveEmbeddingToFirestore(float[] embedding) {
-        List<Float> list = new ArrayList<>();
-        for (float f : embedding) list.add(f);
-
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Bạn chưa đăng nhập!", Toast.LENGTH_SHORT).show();
-                showProcessingUI(false);
-            });
-            return;
-        }
-
-        String uid = currentUser.getUid();
-        db.collection("users").document(uid).get()
-                .addOnSuccessListener(userDoc -> {
-                    if (userDoc.exists()) {
-                        String studentId = userDoc.getString("student_id");
-                        if (studentId != null && !studentId.isEmpty()) {
-                            findStudentAndUpdateEmbedding(studentId, list);
-                        } else {
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, "Tài khoản chưa liên kết với mã sinh viên!", Toast.LENGTH_SHORT).show();
-                                showProcessingUI(false);
-                            });
-                        }
-                    } else {
-                        runOnUiThread(() -> {
-                            Toast.makeText(this, "Không tìm thấy thông tin người dùng!", Toast.LENGTH_SHORT).show();
-                            showProcessingUI(false);
-                        });
-                    }
-                })
-                .addOnFailureListener(e -> runOnUiThread(() -> {
-                    Toast.makeText(this, "Lỗi lấy thông tin người dùng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    showProcessingUI(false);
-                }));
-    }
-
-    // =================================================================================
-    // <<< HÀM ĐÃ ĐƯỢC SỬA LẠI LOGIC TRUY VẤN >>>
-    // =================================================================================
-    private void findStudentAndUpdateEmbedding(String studentId, List<Float> embeddingList) {
-        // Thay vì dùng .whereEqualTo() để tìm kiếm, chúng ta truy cập trực tiếp
-        // vào document có ID chính là studentId và cập nhật nó.
-        db.collection("students").document(studentId)
-                .update("vector_embedding", embeddingList)
-                .addOnSuccessListener(aVoid -> runOnUiThread(() -> {
-                    Toast.makeText(FaceRegisterActivity.this, "Đăng ký khuôn mặt thành công!", Toast.LENGTH_SHORT).show();
-                    finish(); // Đóng activity khi thành công
-                }))
-                .addOnFailureListener(e -> runOnUiThread(() -> {
-                    // Lỗi này thường xảy ra nếu document với studentId không tồn tại.
-                    Toast.makeText(this, "Lỗi: Không tìm thấy sinh viên với mã " + studentId, Toast.LENGTH_LONG).show();
-                    showProcessingUI(false);
-                }));
-    }
-
     private Bitmap imageProxyToBitmap(ImageProxy image) {
         if (image.getFormat() == ImageFormat.YUV_420_888) {
             ByteBuffer yBuffer = image.getPlanes()[0].getBuffer();
             ByteBuffer uBuffer = image.getPlanes()[1].getBuffer();
             ByteBuffer vBuffer = image.getPlanes()[2].getBuffer();
-
             int ySize = yBuffer.remaining();
             int uSize = uBuffer.remaining();
             int vSize = vBuffer.remaining();
-
             byte[] nv21 = new byte[ySize + uSize + vSize];
-
             yBuffer.get(nv21, 0, ySize);
             vBuffer.get(nv21, ySize, vSize);
             uBuffer.get(nv21, ySize + vSize, uSize);
-
             YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             yuvImage.compressToJpeg(new Rect(0, 0, yuvImage.getWidth(), yuvImage.getHeight()), 100, out);
@@ -307,5 +288,18 @@ public class FaceRegisterActivity extends AppCompatActivity {
             return android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         }
         return null;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 123) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startCamera();
+            } else {
+                Toast.makeText(this, "Bạn cần cấp quyền camera để điểm danh", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
     }
 }

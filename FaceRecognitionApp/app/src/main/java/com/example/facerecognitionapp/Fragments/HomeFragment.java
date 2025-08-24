@@ -1,6 +1,7 @@
 package com.example.facerecognitionapp.Fragments;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.facerecognitionapp.FaceAttendanceActivity;
 import com.example.facerecognitionapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,6 +47,7 @@ public class HomeFragment extends Fragment {
         LinearLayout btn_schedule = view.findViewById(R.id.btn_schedule);
         LinearLayout btn_news = view.findViewById(R.id.btn_news);
         LinearLayout btn_absent = view.findViewById(R.id.btn_absent);
+        LinearLayout btnAttendance = view.findViewById(R.id.btn_attendance);
 
         tvTime = view.findViewById(R.id.tvTime);
         tvDate = view.findViewById(R.id.tvDate);
@@ -132,6 +135,11 @@ public class HomeFragment extends Fragment {
                 dialog.show();
 
             }
+        });
+
+        btnAttendance.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), FaceAttendanceActivity.class);
+            startActivity(intent);
         });
 
         return view;
