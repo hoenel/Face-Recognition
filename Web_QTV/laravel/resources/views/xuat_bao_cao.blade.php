@@ -51,66 +51,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Recent Reports -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Báo cáo gần đây</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Tên báo cáo</th>
-                            <th>Loại</th>
-                            <th>Người tạo</th>
-                            <th>Thời gian tạo</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Báo cáo điểm danh tuần 1 - Tháng 8</td>
-                            <td><span class="badge bg-primary">Điểm danh</span></td>
-                            <td>Admin</td>
-                            <td>22/08/2025 14:30</td>
-                            <td><span class="badge bg-success">Hoàn thành</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i> Tải về</button>
-                                <button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i> Xem</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Thống kê sinh viên theo khoa</td>
-                            <td><span class="badge bg-success">Sinh viên</span></td>
-                            <td>Trần Thị B</td>
-                            <td>21/08/2025 16:15</td>
-                            <td><span class="badge bg-success">Hoàn thành</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i> Tải về</button>
-                                <button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i> Xem</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Báo cáo môn học học kỳ 1</td>
-                            <td><span class="badge bg-warning">Môn học</span></td>
-                            <td>Phạm Văn C</td>
-                            <td>20/08/2025 09:45</td>
-                            <td><span class="badge bg-warning">Đang xử lý</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> Chờ</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Attendance Report Modal -->
@@ -122,33 +62,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="attendanceReportForm" action="/reports/attendance" method="POST">
+                    @csrf
                     <div class="mb-3">
                         <label class="form-label">Tên báo cáo</label>
-                        <input type="text" class="form-control" placeholder="Nhập tên báo cáo">
+                        <input type="text" name="report_name" class="form-control" placeholder="Nhập tên báo cáo" value="Báo cáo điểm danh">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Từ ngày</label>
-                        <input type="date" class="form-control">
+                        <input type="date" name="from_date" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Đến ngày</label>
-                        <input type="date" class="form-control">
+                        <input type="date" name="to_date" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Lớp học phần</label>
-                        <select class="form-control">
-                            <option>Tất cả lớp học phần</option>
-                            <option>MATH101-01</option>
-                            <option>PHYS101-01</option>
-                            <option>CS201-01</option>
+                        <select name="class_id" class="form-control">
+                            <option value="">Tất cả lớp học phần</option>
+                            @if(isset($classes) && count($classes) > 0)
+                                @foreach($classes as $class)
+                                    <option value="{{ $class['id'] }}">{{ $class['code'] }} - {{ $class['subject'] }}</option>
+                                @endforeach
+                            @else
+                                <option value="default1">Không có dữ liệu lớp học phần</option>
+                            @endif
                         </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary">Tạo báo cáo</button>
+                <button type="submit" form="attendanceReportForm" class="btn btn-primary">Tạo báo cáo</button>
             </div>
         </div>
     </div>
@@ -163,33 +108,34 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="studentReportForm" action="/reports/student" method="POST">
+                    @csrf
                     <div class="mb-3">
                         <label class="form-label">Tên báo cáo</label>
-                        <input type="text" class="form-control" placeholder="Nhập tên báo cáo">
+                        <input type="text" name="report_name" class="form-control" placeholder="Nhập tên báo cáo" value="Báo cáo sinh viên">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Khoa</label>
-                        <select class="form-control">
-                            <option>Tất cả khoa</option>
-                            <option>Công nghệ thông tin</option>
-                            <option>Cơ khí</option>
-                            <option>Thuỷ lợi</option>
+                        <select name="department" class="form-control">
+                            <option value="">Tất cả khoa</option>
+                            <option value="cntt">Công nghệ thông tin</option>
+                            <option value="co_khi">Cơ khí</option>
+                            <option value="thuy_loi">Thuỷ lợi</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Năm học</label>
-                        <select class="form-control">
-                            <option>2024-2025</option>
-                            <option>2023-2024</option>
-                            <option>2022-2023</option>
+                        <select name="academic_year" class="form-control">
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2022-2023">2022-2023</option>
                         </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-success">Tạo báo cáo</button>
+                <button type="submit" form="studentReportForm" class="btn btn-success">Tạo báo cáo</button>
             </div>
         </div>
     </div>
@@ -204,33 +150,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="subjectReportForm" action="/reports/subject" method="POST">
+                    @csrf
                     <div class="mb-3">
                         <label class="form-label">Tên báo cáo</label>
-                        <input type="text" class="form-control" placeholder="Nhập tên báo cáo">
+                        <input type="text" name="report_name" class="form-control" placeholder="Nhập tên báo cáo" value="Báo cáo môn học">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Môn học</label>
-                        <select class="form-control">
-                            <option>Tất cả môn học</option>
-                            <option>Toán cao cấp 1</option>
-                            <option>Vật lý đại cương</option>
-                            <option>Lập trình web</option>
+                        <select name="subject_id" class="form-control">
+                            <option value="">Tất cả môn học</option>
+                            @if(isset($courses) && count($courses) > 0)
+                                @foreach($courses as $course)
+                                    <option value="{{ $course['id'] }}">{{ $course['code'] }} - {{ $course['name'] }}</option>
+                                @endforeach
+                            @else
+                                <option value="default1">Không có dữ liệu môn học</option>
+                            @endif
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Học kỳ</label>
-                        <select class="form-control">
-                            <option>Học kỳ 1 - 2024-2025</option>
-                            <option>Học kỳ 2 - 2023-2024</option>
-                            <option>Học kỳ hè - 2024</option>
+                        <select name="semester" class="form-control">
+                            <option value="hk1_2024_2025">Học kỳ 1 - 2024-2025</option>
+                            <option value="hk2_2023_2024">Học kỳ 2 - 2023-2024</option>
+                            <option value="hk_he_2024">Học kỳ hè - 2024</option>
                         </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-warning">Tạo báo cáo</button>
+                <button type="submit" form="subjectReportForm" class="btn btn-warning">Tạo báo cáo</button>
             </div>
         </div>
     </div>

@@ -63,6 +63,7 @@ class FirebaseService
                 'fields' => [
                     'course_code' => ['stringValue' => $data['code']],
                     'course_name' => ['stringValue' => $data['name']],
+                    'credit' => ['integerValue' => $data['credit'] ?? 3],
                     'teacher_name' => ['stringValue' => $data['teacher'] ?? ''],
                     'created_at' => ['stringValue' => now()->toISOString()]
                 ]
@@ -72,6 +73,47 @@ class FirebaseService
             return $response->successful();
         } catch (\Exception $e) {
             Log::error('Firebase createCourse error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function createClass($data)
+    {
+        try {
+            $url = "{$this->baseUrl}/classes";
+            
+            // Prepare student_ids array
+            $studentIds = [];
+            if (!empty($data['student_ids'])) {
+                // Split by comma or newline and clean up
+                $rawIds = preg_split('/[,\n\r]+/', $data['student_ids']);
+                $studentIds = array_filter(array_map('trim', $rawIds));
+            }
+            
+            // Prepare Firestore document
+            $classData = [
+                'fields' => [
+                    'class_name' => ['stringValue' => $data['class_name']],
+                    'teacher_id' => ['stringValue' => $data['teacher_id']],
+                    'created_at' => ['stringValue' => now()->toISOString()]
+                ]
+            ];
+            
+            // Add student_ids array if not empty
+            if (!empty($studentIds)) {
+                $classData['fields']['student_ids'] = [
+                    'arrayValue' => [
+                        'values' => array_map(function($id) {
+                            return ['stringValue' => $id];
+                        }, $studentIds)
+                    ]
+                ];
+            }
+            
+            $response = Http::post($url, $classData);
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error('Firebase createClass error: ' . $e->getMessage());
             return false;
         }
     }
@@ -145,6 +187,30 @@ class FirebaseService
         return $students;
     }
 
+    public function createStudent($data)
+    {
+        try {
+            $url = "{$this->baseUrl}/students";
+            $studentData = [
+                'fields' => [
+                    'name' => ['stringValue' => $data['name']],
+                    'email' => ['stringValue' => $data['email']],
+                    'class_id' => ['stringValue' => ''],
+                    'field_of_study' => ['stringValue' => ''],
+                    'hometown' => ['stringValue' => ''],
+                    'date_of_birth' => ['stringValue' => ''],
+                    'created_at' => ['stringValue' => now()->toISOString()]
+                ]
+            ];
+            
+            $response = Http::post($url, $studentData);
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error('Firebase createStudent error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     // Users Management
     public function getUsers()
     {
@@ -175,6 +241,27 @@ class FirebaseService
         return $users;
     }
 
+    public function createUser($data)
+    {
+        try {
+            $url = "{$this->baseUrl}/users";
+            $userData = [
+                'fields' => [
+                    'name' => ['stringValue' => $data['name']],
+                    'email' => ['stringValue' => $data['email']],
+                    'role' => ['stringValue' => $data['role']],
+                    'created_at' => ['stringValue' => now()->toISOString()]
+                ]
+            ];
+            
+            $response = Http::post($url, $userData);
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error('Firebase createUser error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     // Schedules Management
     public function getSchedules()
     {
@@ -195,27 +282,35 @@ class FirebaseService
                         // Create a schedule entry for each session in the array
                         if (is_array($scheduleSessions) && !empty($scheduleSessions)) {
                             foreach ($scheduleSessions as $index => $session) {
+                                $startTime = $session['start_time'] ?? '';
+                                $endTime = $this->calculateEndTime($startTime);
+                                
                                 $schedules[] = [
                                     'id' => $docData['id'] . '_' . $index,
                                     'course_code' => $session['course_code'] ?? '',
                                     'course_name' => $session['course_name'] ?? '',
                                     'class_id' => $session['class_id'] ?? '',
                                     'classroom' => $session['classroom'] ?? '',
-                                    'date' => $session['date'] ?? '',
-                                    'start_time' => $session['start_time'] ?? '',
+                                    'date' => $session['date'] ?? '', // Lấy nguyên string từ Firebase
+                                    'start_time' => $startTime,
+                                    'time' => $startTime . ' - ' . $endTime,
                                     'schedule_sessions' => [$session] // Wrap single session in array
                                 ];
                             }
                         } else {
-                            // Fallback for documents without schedule_sessions
+                            // Fallback for documents without schedule_sessions  
+                            $startTime = $docData['start_time'] ?? '';
+                            $endTime = $this->calculateEndTime($startTime);
+                            
                             $schedules[] = [
                                 'id' => $docData['id'],
                                 'course_code' => $docData['course_code'] ?? '',
                                 'course_name' => $docData['course_name'] ?? '',
                                 'class_id' => $docData['class_id'] ?? '',
                                 'classroom' => $docData['classroom'] ?? '',
-                                'date' => $docData['date'] ?? '',
-                                'start_time' => $docData['start_time'] ?? '',
+                                'date' => $docData['date'] ?? '', // Lấy nguyên string từ Firebase
+                                'start_time' => $startTime,
+                                'time' => $startTime . ' - ' . $endTime,
                                 'schedule_sessions' => []
                             ];
                         }
@@ -310,5 +405,22 @@ class FirebaseService
             return 'Chưa phân công';
         }
         return 'GV.' . $teacherId;
+    }
+    
+    // Helper method to calculate end time
+    private function calculateEndTime($startTime)
+    {
+        if (empty($startTime)) {
+            return '00:00';
+        }
+        
+        // Parse start time and add 90 minutes (typical class duration)
+        $time = \DateTime::createFromFormat('H:i', $startTime);
+        if ($time) {
+            $time->add(new \DateInterval('PT90M')); // Add 90 minutes
+            return $time->format('H:i');
+        }
+        
+        return '00:00';
     }
 }

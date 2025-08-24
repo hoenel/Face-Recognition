@@ -4,9 +4,24 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Quản lý lớp học phần</h2>
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">
             <i class="fas fa-plus"></i> Thêm lớp học phần
         </button>
     </div>
@@ -16,10 +31,10 @@
         <div class="card-body">
             <form method="GET" action="{{ route('classes.index') }}">
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <input type="text" name="search" class="form-control" placeholder="Tìm kiếm lớp học..." value="{{ request('search') }}">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <select name="subject" class="form-control">
                             <option value="">Tất cả môn học</option>
                             @php
@@ -30,7 +45,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <select name="instructor" class="form-control">
                             <option value="">Tất cả giảng viên</option>
                             @php
@@ -42,17 +57,6 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <select name="status" class="form-control">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang diễn ra</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chưa bắt đầu</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Đã kết thúc</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" name="room" class="form-control" placeholder="Phòng học..." value="{{ request('room') }}">
-                    </div>
-                    <div class="col-md-1">
                         <button type="submit" class="btn btn-outline-primary w-100">Tìm</button>
                     </div>
                 </div>
@@ -70,11 +74,7 @@
                             <th>Mã lớp</th>
                             <th>Môn học</th>
                             <th>Giảng viên</th>
-                            <th>Phòng học</th>
-                            <th>Thời gian</th>
                             <th>Số sinh viên</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,24 +83,7 @@
                             <td><strong>{{ $class['code'] }}</strong></td>
                             <td>{{ $class['subject'] }}</td>
                             <td>{{ $class['instructor'] }}</td>
-                            <td>{{ $class['room'] }}</td>
-                            <td>{{ $class['schedule'] }}</td>
                             <td><span class="badge bg-info">{{ $class['students'] }}</span></td>
-                            <td>
-                                @if($class['status'] == 'active')
-                                    <span class="badge bg-success">Đang diễn ra</span>
-                                @elseif($class['status'] == 'pending')
-                                    <span class="badge bg-warning">Chưa bắt đầu</span>
-                                @else
-                                    <span class="badge bg-secondary">Đã kết thúc</span>
-                                @endif
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-sm btn-outline-info"><i class="fas fa-users"></i></button>
-                                <button class="btn btn-sm btn-outline-warning"><i class="fas fa-calendar"></i></button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -113,6 +96,42 @@
                 <p class="text-muted mt-3">Chưa có lớp học phần nào - Trường Đại học Thuỷ lợi</p>
             </div>
             @endif
+        </div>
+    </div>
+</div>
+
+<!-- Add Class Modal -->
+<div class="modal fade" id="addClassModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm lớp học phần mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addClassForm" action="/classes/create" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label">Tên lớp học phần <span class="text-danger">*</span></label>
+                        <input type="text" name="class_name" class="form-control" placeholder="Ví dụ: K63 Công nghệ thông tin Việt-Nhật" required>
+                        <small class="text-muted">Nhập tên đầy đủ của lớp học phần</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mã giảng viên <span class="text-danger">*</span></label>
+                        <input type="text" name="teacher_id" class="form-control" placeholder="Ví dụ: TXT-123" required>
+                        <small class="text-muted">Nhập mã giảng viên phụ trách</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh sách mã sinh viên</label>
+                        <textarea name="student_ids" class="form-control" rows="4" placeholder="Nhập danh sách mã sinh viên, mỗi mã một dòng hoặc cách nhau bằng dấu phẩy&#10;Ví dụ:&#10;2151062753&#10;2151062894&#10;hoặc: 2151062753, 2151062894"></textarea>
+                        <small class="text-muted">Có thể để trống và thêm sinh viên sau</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" form="addClassForm" class="btn btn-primary">Thêm lớp học phần</button>
+            </div>
         </div>
     </div>
 </div>

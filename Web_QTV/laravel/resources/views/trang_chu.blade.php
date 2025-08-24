@@ -12,7 +12,7 @@
     
     <!-- Statistics Cards -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card text-white bg-primary">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -28,7 +28,7 @@
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card text-white bg-success">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -44,7 +44,7 @@
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card text-white bg-warning">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -59,76 +59,47 @@
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-info">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Điểm danh hôm nay</h5>
-                            <h3>{{ $stats['today_attendance'] }}</h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-check fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     
-    <!-- Recent Activities -->
+    <!-- Today's Schedule -->
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5>Hoạt động gần đây</h5>
+                    <h5>Lịch học hôm nay - {{ date('d/m/Y') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Thời gian</th>
-                                    <th>Hoạt động</th>
-                                    <th>Người thực hiện</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($recent_activities as $activity)
-                                <tr>
-                                    <td>{{ $activity['time'] }}</td>
-                                    <td>{{ $activity['action'] }}</td>
-                                    <td>{{ $activity['user'] }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Lịch học hôm nay</h5>
-                </div>
-                <div class="card-body">
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <strong>07:30 - 09:00</strong>
-                            <div class="text-muted">Toán cao cấp 1 - Phòng A101</div>
+                    @if(count($schedules) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Mã môn học</th>
+                                        <th>Tên môn học</th>
+                                        <th>Lớp</th>
+                                        <th>Phòng học</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($schedules as $schedule)
+                                    <tr>
+                                        <td><strong>{{ $schedule['time'] ?? $schedule['start_time'] ?? 'N/A' }}</strong></td>
+                                        <td>{{ $schedule['course_code'] ?? 'N/A' }}</td>
+                                        <td>{{ $schedule['course_name'] ?? 'N/A' }}</td>
+                                        <td>{{ $schedule['class_id'] ?? 'N/A' }}</td>
+                                        <td>{{ $schedule['classroom'] ?? 'N/A' }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="timeline-item mt-3">
-                            <strong>09:15 - 10:45</strong>
-                            <div class="text-muted">Vật lý đại cương - Phòng B203</div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">Không có lịch học hôm nay - Trường Đại học Thuỷ lợi</p>
                         </div>
-                        <div class="timeline-item mt-3">
-                            <strong>13:30 - 15:00</strong>
-                            <div class="text-muted">Lập trình web - Phòng C105</div>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>

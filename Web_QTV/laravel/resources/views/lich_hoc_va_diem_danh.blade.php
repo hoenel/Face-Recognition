@@ -6,9 +6,6 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Lịch học và điểm danh</h2>
-        <button class="btn btn-primary">
-            <i class="fas fa-camera"></i> Bắt đầu điểm danh
-        </button>
     </div>
     
     <!-- Date and Class Filter -->
@@ -18,7 +15,7 @@
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label">Chọn ngày</label>
-                        <input type="date" name="filter_date" class="form-control" value="{{ request('filter_date', '2025-08-01') }}">
+                        <input type="date" name="filter_date" class="form-control" value="{{ request('filter_date', date('Y-m-d')) }}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Chọn môn học</label>
@@ -64,7 +61,7 @@
     <!-- Schedule Table -->
     <div class="card">
         <div class="card-header">
-            <h5 class="mb-0">Lịch học ngày {{ request('filter_date') ? date('d/m/Y', strtotime(request('filter_date'))) : '01/08/2025' }}</h5>
+            <h5 class="mb-0">Lịch học ngày {{ request('filter_date') ? date('d/m/Y', strtotime(request('filter_date'))) : date('d/m/Y') }}</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -76,8 +73,6 @@
                             <th>Tên môn học</th>
                             <th>Lớp</th>
                             <th>Phòng học</th>
-                            <th>Ngày</th>
-                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,11 +83,6 @@
                             <td>{{ $schedule['course_name'] ?? 'N/A' }}</td>
                             <td>{{ $schedule['class_id'] ?? 'N/A' }}</td>
                             <td>{{ $schedule['classroom'] ?? 'N/A' }}</td>
-                            <td>{{ isset($schedule['date']) ? date('d/m/Y', strtotime($schedule['date'])) : 'N/A' }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i> Xem</button>
-                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Sửa</button>
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>

@@ -4,9 +4,24 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Quản lý Môn học</h2>
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
             <i class="fas fa-plus"></i> Thêm môn học
         </button>
     </div>
@@ -70,7 +85,6 @@
                             <th>Tên môn học</th>
                             <th>Số tín chỉ</th>
                             <th>Giảng viên</th>
-                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,14 +94,6 @@
                             <td>{{ $subject['name'] }}</td>
                             <td><span class="badge bg-info">{{ $subject['credits'] }}</span></td>
                             <td>{{ $subject['teacher'] ?? 'Chưa phân công' }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-success me-1">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </button>
-                                <button class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash"></i> Xóa
-                                </button>
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -100,6 +106,54 @@
                 <p class="text-muted mt-3">Chưa có môn học nào - Trường Đại học Thuỷ lợi</p>
             </div>
             @endif
+        </div>
+    </div>
+</div>
+
+<!-- Add Subject Modal -->
+<div class="modal fade" id="addSubjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm môn học mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSubjectForm" action="/subjects/create" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label">Mã môn học <span class="text-danger">*</span></label>
+                        <input type="text" name="course_code" class="form-control" placeholder="Ví dụ: CS101, MATH201" required>
+                        <small class="text-muted">Nhập mã môn học (không có dấu cách)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên môn học <span class="text-danger">*</span></label>
+                        <input type="text" name="course_name" class="form-control" placeholder="Ví dụ: Lập trình Java cơ bản" required>
+                        <small class="text-muted">Nhập tên đầy đủ của môn học</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số tín chỉ <span class="text-danger">*</span></label>
+                        <select name="credit" class="form-control" required>
+                            <option value="">Chọn số tín chỉ</option>
+                            <option value="1">1 tín chỉ</option>
+                            <option value="2">2 tín chỉ</option>
+                            <option value="3">3 tín chỉ</option>
+                            <option value="4">4 tín chỉ</option>
+                            <option value="5">5 tín chỉ</option>
+                            <option value="6">6 tín chỉ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên giảng viên</label>
+                        <input type="text" name="teacher_name" class="form-control" placeholder="Ví dụ: TS. Nguyễn Văn A">
+                        <small class="text-muted">Có thể để trống và phân công sau</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" form="addSubjectForm" class="btn btn-primary">Thêm môn học</button>
+            </div>
         </div>
     </div>
 </div>
