@@ -14,29 +14,31 @@
     <!-- Search and Filter -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" placeholder="Tìm kiếm theo tên, email...">
+            <form method="GET" action="{{ route('accounts.index') }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Tìm kiếm theo tên, email..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="role" class="form-control">
+                            <option value="">Tất cả vai trò</option>
+                            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Quản trị viên</option>
+                            <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Giảng viên</option>
+                            <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Sinh viên</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-control">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Hoạt động</option>
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Tìm kiếm</button>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <select class="form-control">
-                        <option>Tất cả vai trò</option>
-                        <option>Quản trị viên</option>
-                        <option>Giảng viên</option>
-                        <option>Sinh viên</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-control">
-                        <option>Tất cả trạng thái</option>
-                        <option>Hoạt động</option>
-                        <option>Không hoạt động</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline-primary w-100">Tìm kiếm</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
     

@@ -14,41 +14,57 @@
     <!-- Date and Class Filter -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Chọn ngày</label>
-                    <input type="date" class="form-control" value="2025-08-23">
+            <form method="GET" action="{{ route('schedules.index') }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Chọn ngày</label>
+                        <input type="date" name="filter_date" class="form-control" value="{{ request('filter_date', '2025-08-01') }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Chọn môn học</label>
+                        <select name="filter_course" class="form-control">
+                            <option value="">Tất cả môn học</option>
+                            @php
+                                $courseNames = array_unique(array_filter(array_map(function($s) { 
+                                    return $s['course_name'] ?? ''; 
+                                }, $schedules)));
+                            @endphp
+                            @foreach($courseNames as $courseName)
+                                @if(!empty($courseName))
+                                    <option value="{{ $courseName }}" {{ request('filter_course') == $courseName ? 'selected' : '' }}>{{ $courseName }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Phòng học</label>
+                        <select name="filter_classroom" class="form-control">
+                            <option value="">Tất cả phòng</option>
+                            @php
+                                $classrooms = array_unique(array_filter(array_map(function($s) { 
+                                    return $s['classroom'] ?? ''; 
+                                }, $schedules)));
+                            @endphp
+                            @foreach($classrooms as $classroom)
+                                @if(!empty($classroom))
+                                    <option value="{{ $classroom }}" {{ request('filter_classroom') == $classroom ? 'selected' : '' }}>{{ $classroom }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-outline-primary w-100 d-block">Lọc</button>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Chọn lớp học phần</label>
-                    <select class="form-control">
-                        <option>Tất cả lớp học phần</option>
-                        <option>MATH101-01 - Toán cao cấp 1</option>
-                        <option>PHYS101-01 - Vật lý đại cương</option>
-                        <option>CS201-01 - Lập trình web</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Trạng thái điểm danh</label>
-                    <select class="form-control">
-                        <option>Tất cả</option>
-                        <option>Đã điểm danh</option>
-                        <option>Chưa điểm danh</option>
-                        <option>Đang diễn ra</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">&nbsp;</label>
-                    <button class="btn btn-outline-primary w-100 d-block">Lọc</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
     
     <!-- Schedule Table -->
     <div class="card">
         <div class="card-header">
-            <h5 class="mb-0">Lịch học ngày 23/08/2025</h5>
+            <h5 class="mb-0">Lịch học ngày {{ request('filter_date') ? date('d/m/Y', strtotime(request('filter_date'))) : '01/08/2025' }}</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -56,117 +72,70 @@
                     <thead class="table-primary">
                         <tr>
                             <th>Thời gian</th>
-                            <th>Mã lớp</th>
-                            <th>Môn học</th>
-                            <th>Giảng viên</th>
+                            <th>Mã môn học</th>
+                            <th>Tên môn học</th>
+                            <th>Lớp</th>
                             <th>Phòng học</th>
-                            <th>Sĩ số</th>
-                            <th>Trạng thái</th>
+                            <th>Ngày</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($schedules as $schedule)
                         <tr>
-                            <td><strong>07:30 - 09:00</strong></td>
-                            <td>MATH101-01</td>
-                            <td>Toán cao cấp 1</td>
-                            <td>TS. Nguyễn Văn A</td>
-                            <td>A101</td>
-                            <td>
-                                <span class="badge bg-success">42/45</span>
-                                <small class="text-muted d-block">Có mặt: 42, Vắng: 3</small>
-                            </td>
-                            <td><span class="badge bg-success">Đã điểm danh</span></td>
+                            <td><strong>{{ $schedule['time'] ?? $schedule['start_time'] ?? 'N/A' }}</strong></td>
+                            <td>{{ $schedule['course_code'] ?? 'N/A' }}</td>
+                            <td>{{ $schedule['course_name'] ?? 'N/A' }}</td>
+                            <td>{{ $schedule['class_id'] ?? 'N/A' }}</td>
+                            <td>{{ $schedule['classroom'] ?? 'N/A' }}</td>
+                            <td>{{ isset($schedule['date']) ? date('d/m/Y', strtotime($schedule['date'])) : 'N/A' }}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i> Xem</button>
                                 <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Sửa</button>
                             </td>
                         </tr>
-                        <tr>
-                            <td><strong>09:15 - 10:45</strong></td>
-                            <td>PHYS101-01</td>
-                            <td>Vật lý đại cương</td>
-                            <td>PGS. Trần Thị B</td>
-                            <td>B203</td>
-                            <td>
-                                <span class="badge bg-info">0/38</span>
-                                <small class="text-muted d-block">Chưa điểm danh</small>
-                            </td>
-                            <td><span class="badge bg-warning">Đang diễn ra</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-success"><i class="fas fa-camera"></i> Điểm danh</button>
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-list"></i> DS lớp</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>13:30 - 15:00</strong></td>
-                            <td>CS201-01</td>
-                            <td>Lập trình web</td>
-                            <td>ThS. Phạm Văn C</td>
-                            <td>C105</td>
-                            <td>
-                                <span class="badge bg-secondary">0/25</span>
-                                <small class="text-muted d-block">Chưa đến giờ</small>
-                            </td>
-                            <td><span class="badge bg-secondary">Chưa bắt đầu</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> Chờ</button>
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-list"></i> DS lớp</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>15:15 - 16:45</strong></td>
-                            <td>HYDRO101-01</td>
-                            <td>Cơ sở thuỷ lực</td>
-                            <td>Prof. Lê Thị D</td>
-                            <td>D301</td>
-                            <td>
-                                <span class="badge bg-secondary">0/20</span>
-                                <small class="text-muted d-block">Chưa đến giờ</small>
-                            </td>
-                            <td><span class="badge bg-secondary">Chưa bắt đầu</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> Chờ</button>
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-list"></i> DS lớp</button>
-                            </td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+            
+            @if(count($schedules) == 0)
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-3">Chưa có lịch học nào - Trường Đại học Thuỷ lợi</p>
+            </div>
+            @endif
         </div>
     </div>
     
-    <!-- Attendance Summary -->
+    <!-- Schedule Summary -->
     <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-success">
-                <div class="card-body text-center">
-                    <h4>1</h4>
-                    <p class="mb-0">Lớp đã điểm danh</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body text-center">
-                    <h4>1</h4>
-                    <p class="mb-0">Lớp đang diễn ra</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-secondary">
-                <div class="card-body text-center">
-                    <h4>2</h4>
-                    <p class="mb-0">Lớp chưa bắt đầu</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card text-white bg-info">
                 <div class="card-body text-center">
-                    <h4>93.3%</h4>
-                    <p class="mb-0">Tỷ lệ có mặt</p>
+                    <h4>{{ count($schedules) }}</h4>
+                    <p class="mb-0">Tổng số lịch học</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h4>{{ count(array_filter($schedules, function($s) { return !empty($s['classroom'] ?? ''); })) }}</h4>
+                    <p class="mb-0">Đã phân phòng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    @php
+                        $uniqueCourses = array_unique(array_filter(array_map(function($s) { 
+                            return $s['course_code'] ?? ''; 
+                        }, $schedules)));
+                    @endphp
+                    <h4>{{ count($uniqueCourses) }}</h4>
+                    <p class="mb-0">Số môn học</p>
                 </div>
             </div>
         </div>

@@ -132,6 +132,11 @@ Route::middleware([SimpleAuth::class])->group(function () {
     Route::get('/accounts', function () {
         $firebase = app(\App\Services\FirebaseService::class);
         
+        // Get filter parameters
+        $search = request('search', '');
+        $role = request('role', '');
+        $status = request('status', '');
+        
         try {
             // Lấy cả users (admin/teachers) và students từ Firebase
             $users = $firebase->getUsers();
@@ -175,6 +180,29 @@ Route::middleware([SimpleAuth::class])->group(function () {
                     ['id' => '4', 'name' => 'Lê Thị D', 'email' => 'student1@htd.edu.vn', 'role' => 'student', 'status' => 'inactive', 'created_at' => '18/08/2025', 'additional_info' => 'Kinh tế'],
                 ];
             }
+            
+            // Apply filters
+            if (!empty($search)) {
+                $accounts = array_filter($accounts, function($account) use ($search) {
+                    return stripos($account['name'] ?? '', $search) !== false || 
+                           stripos($account['email'] ?? '', $search) !== false;
+                });
+            }
+            
+            if (!empty($role)) {
+                $accounts = array_filter($accounts, function($account) use ($role) {
+                    return ($account['role'] ?? '') === $role;
+                });
+            }
+            
+            if (!empty($status)) {
+                $accounts = array_filter($accounts, function($account) use ($status) {
+                    return ($account['status'] ?? '') === $status;
+                });
+            }
+            
+            // Reset array keys after filtering
+            $accounts = array_values($accounts);
         } catch (\Exception $e) {
             // Fallback data nếu Firebase lỗi
             $accounts = [
@@ -183,6 +211,28 @@ Route::middleware([SimpleAuth::class])->group(function () {
                 ['id' => '3', 'name' => 'Phạm Văn C', 'email' => 'demo@example.com', 'role' => 'student', 'status' => 'active', 'created_at' => '17/08/2025', 'additional_info' => 'CNTT'],
                 ['id' => '4', 'name' => 'Lê Thị D', 'email' => 'student1@htd.edu.vn', 'role' => 'student', 'status' => 'inactive', 'created_at' => '18/08/2025', 'additional_info' => 'Kinh tế'],
             ];
+            
+            // Apply same filters to fallback data
+            if (!empty($search)) {
+                $accounts = array_filter($accounts, function($account) use ($search) {
+                    return stripos($account['name'], $search) !== false || 
+                           stripos($account['email'], $search) !== false;
+                });
+            }
+            
+            if (!empty($role)) {
+                $accounts = array_filter($accounts, function($account) use ($role) {
+                    return $account['role'] === $role;
+                });
+            }
+            
+            if (!empty($status)) {
+                $accounts = array_filter($accounts, function($account) use ($status) {
+                    return $account['status'] === $status;
+                });
+            }
+            
+            $accounts = array_values($accounts);
         }
         
         return view('quan_ly_tai_khoan', compact('accounts'));
@@ -191,6 +241,13 @@ Route::middleware([SimpleAuth::class])->group(function () {
     // Quản lí môn học với dữ liệu Firebase thực
     Route::get('/subjects', function () {
         $firebase = app(\App\Services\FirebaseService::class);
+        
+        // Get filter parameters
+        $search = request('search', '');
+        $department = request('department', '');
+        $credits = request('credits', '');
+        $status = request('status', '');
+        $code = request('code', '');
         
         try {
             $subjects = $firebase->getCourses();
@@ -205,6 +262,43 @@ Route::middleware([SimpleAuth::class])->group(function () {
                     ['id' => '5', 'code' => 'MECH101', 'name' => 'Cơ học kỹ thuật', 'credits' => 4, 'department' => 'Khoa Cơ khí', 'teacher' => 'TS. Hoàng E', 'status' => 'completed'],
                 ];
             }
+            
+            // Apply filters
+            if (!empty($search)) {
+                $subjects = array_filter($subjects, function($subject) use ($search) {
+                    return stripos($subject['name'] ?? '', $search) !== false;
+                });
+            }
+            
+            if (!empty($department)) {
+                $subjects = array_filter($subjects, function($subject) use ($department) {
+                    return ($subject['department'] ?? '') === $department;
+                });
+            }
+            
+            if (!empty($credits)) {
+                $subjects = array_filter($subjects, function($subject) use ($credits) {
+                    if ($credits == '5') {
+                        return ($subject['credits'] ?? 0) >= 5;
+                    }
+                    return ($subject['credits'] ?? 0) == intval($credits);
+                });
+            }
+            
+            if (!empty($status)) {
+                $subjects = array_filter($subjects, function($subject) use ($status) {
+                    return ($subject['status'] ?? '') === $status;
+                });
+            }
+            
+            if (!empty($code)) {
+                $subjects = array_filter($subjects, function($subject) use ($code) {
+                    return stripos($subject['code'] ?? '', $code) !== false;
+                });
+            }
+            
+            // Reset array keys after filtering
+            $subjects = array_values($subjects);
         } catch (\Exception $e) {
             // Fallback data nếu Firebase lỗi
             $subjects = [
@@ -214,6 +308,42 @@ Route::middleware([SimpleAuth::class])->group(function () {
                 ['id' => '4', 'code' => 'HYDRO101', 'name' => 'Cơ sở thuỷ lực', 'credits' => 3, 'department' => 'Khoa Thuỷ lợi', 'teacher' => 'Prof. Lê D', 'status' => 'active'],
                 ['id' => '5', 'code' => 'MECH101', 'name' => 'Cơ học kỹ thuật', 'credits' => 4, 'department' => 'Khoa Cơ khí', 'teacher' => 'TS. Hoàng E', 'status' => 'completed'],
             ];
+            
+            // Apply same filters to fallback data
+            if (!empty($search)) {
+                $subjects = array_filter($subjects, function($subject) use ($search) {
+                    return stripos($subject['name'], $search) !== false;
+                });
+            }
+            
+            if (!empty($department)) {
+                $subjects = array_filter($subjects, function($subject) use ($department) {
+                    return $subject['department'] === $department;
+                });
+            }
+            
+            if (!empty($credits)) {
+                $subjects = array_filter($subjects, function($subject) use ($credits) {
+                    if ($credits == '5') {
+                        return $subject['credits'] >= 5;
+                    }
+                    return $subject['credits'] == intval($credits);
+                });
+            }
+            
+            if (!empty($status)) {
+                $subjects = array_filter($subjects, function($subject) use ($status) {
+                    return $subject['status'] === $status;
+                });
+            }
+            
+            if (!empty($code)) {
+                $subjects = array_filter($subjects, function($subject) use ($code) {
+                    return stripos($subject['code'], $code) !== false;
+                });
+            }
+            
+            $subjects = array_values($subjects);
         }
         
         return view('quan_ly_mon_hoc', compact('subjects'));
@@ -222,6 +352,13 @@ Route::middleware([SimpleAuth::class])->group(function () {
     // Quản lí lớp học phần với dữ liệu Firebase thực
     Route::get('/classes', function () {
         $firebase = app(\App\Services\FirebaseService::class);
+        
+        // Get filter parameters
+        $search = request('search', '');
+        $subject = request('subject', '');
+        $instructor = request('instructor', '');
+        $status = request('status', '');
+        $room = request('room', '');
         
         try {
             $classes = $firebase->getClasses();
@@ -236,6 +373,41 @@ Route::middleware([SimpleAuth::class])->group(function () {
                     ['id' => '5', 'code' => 'MECH101-01', 'subject' => 'Cơ học kỹ thuật', 'instructor' => 'TS. Hoàng Văn E', 'room' => 'E201', 'schedule' => 'T5,T7 (07:30-09:00)', 'students' => 35, 'max_students' => 40, 'status' => 'completed'],
                 ];
             }
+            
+            // Apply filters
+            if (!empty($search)) {
+                $classes = array_filter($classes, function($class) use ($search) {
+                    return stripos($class['subject'] ?? '', $search) !== false || 
+                           stripos($class['code'] ?? '', $search) !== false;
+                });
+            }
+            
+            if (!empty($subject)) {
+                $classes = array_filter($classes, function($class) use ($subject) {
+                    return ($class['subject'] ?? '') === $subject;
+                });
+            }
+            
+            if (!empty($instructor)) {
+                $classes = array_filter($classes, function($class) use ($instructor) {
+                    return ($class['instructor'] ?? '') === $instructor;
+                });
+            }
+            
+            if (!empty($status)) {
+                $classes = array_filter($classes, function($class) use ($status) {
+                    return ($class['status'] ?? '') === $status;
+                });
+            }
+            
+            if (!empty($room)) {
+                $classes = array_filter($classes, function($class) use ($room) {
+                    return stripos($class['room'] ?? '', $room) !== false;
+                });
+            }
+            
+            // Reset array keys after filtering
+            $classes = array_values($classes);
         } catch (\Exception $e) {
             // Fallback data nếu Firebase lỗi
             $classes = [
@@ -245,6 +417,40 @@ Route::middleware([SimpleAuth::class])->group(function () {
                 ['id' => '4', 'code' => 'HYDRO101-01', 'subject' => 'Cơ sở thuỷ lực', 'instructor' => 'Prof. Lê Thị D', 'room' => 'D301', 'schedule' => 'T3,T6 (15:15-16:45)', 'students' => 20, 'max_students' => 25, 'status' => 'active'],
                 ['id' => '5', 'code' => 'MECH101-01', 'subject' => 'Cơ học kỹ thuật', 'instructor' => 'TS. Hoàng Văn E', 'room' => 'E201', 'schedule' => 'T5,T7 (07:30-09:00)', 'students' => 35, 'max_students' => 40, 'status' => 'completed'],
             ];
+            
+            // Apply same filters to fallback data
+            if (!empty($search)) {
+                $classes = array_filter($classes, function($class) use ($search) {
+                    return stripos($class['subject'], $search) !== false || 
+                           stripos($class['code'], $search) !== false;
+                });
+            }
+            
+            if (!empty($subject)) {
+                $classes = array_filter($classes, function($class) use ($subject) {
+                    return $class['subject'] === $subject;
+                });
+            }
+            
+            if (!empty($instructor)) {
+                $classes = array_filter($classes, function($class) use ($instructor) {
+                    return $class['instructor'] === $instructor;
+                });
+            }
+            
+            if (!empty($status)) {
+                $classes = array_filter($classes, function($class) use ($status) {
+                    return $class['status'] === $status;
+                });
+            }
+            
+            if (!empty($room)) {
+                $classes = array_filter($classes, function($class) use ($room) {
+                    return stripos($class['room'], $room) !== false;
+                });
+            }
+            
+            $classes = array_values($classes);
         }
         
         return view('quan_ly_lop_hoc_phan', compact('classes'));
@@ -253,6 +459,11 @@ Route::middleware([SimpleAuth::class])->group(function () {
     // Lịch học và điểm danh với dữ liệu Firebase thực
     Route::get('/schedules', function () {
         $firebase = app(\App\Services\FirebaseService::class);
+        
+        // Get filter parameters
+        $filterDate = request('filter_date', '2025-08-01');
+        $filterCourse = request('filter_course', '');
+        $filterClassroom = request('filter_classroom', '');
         
         // Helper function to determine schedule status
         $getScheduleStatus = function($startTime) {
@@ -283,14 +494,12 @@ Route::middleware([SimpleAuth::class])->group(function () {
                 $schedules[] = [
                     'id' => $schedule['id'],
                     'time' => $timeSlot,
-                    'class_code' => $schedule['course_code'] ?? '',
-                    'subject' => $schedule['course_name'] ?? '',
-                    'teacher' => 'GV.' . substr($schedule['class_id'] ?? '', 0, 10), // Simplified teacher name
-                    'room' => $schedule['classroom'] ?? 'TBA',
+                    'course_code' => $schedule['course_code'] ?? '',
+                    'course_name' => $schedule['course_name'] ?? '',
+                    'class_id' => $schedule['class_id'] ?? '',
+                    'classroom' => $schedule['classroom'] ?? 'TBA',
                     'date' => $schedule['date'] ?? date('d/m/Y'),
-                    'present' => rand(20, 45), // Mock attendance data
-                    'total' => rand(40, 50),   // Mock total students
-                    'status' => $getScheduleStatus($schedule['start_time'] ?? '07:30'),
+                    'start_time' => $schedule['start_time'] ?? '07:30',
                     'schedule_sessions' => $schedule['schedule_sessions'] ?? []
                 ];
             }
@@ -298,20 +507,66 @@ Route::middleware([SimpleAuth::class])->group(function () {
             // Nếu không có dữ liệu từ Firebase, dùng fallback
             if (empty($schedules)) {
                 $schedules = [
-                    ['id' => '1', 'time' => '07:30 - 09:00', 'class_code' => 'MATH101-01', 'subject' => 'Toán cao cấp 1', 'teacher' => 'TS. Nguyễn Văn A', 'room' => 'A101', 'date' => date('d/m/Y'), 'present' => 42, 'total' => 45, 'status' => 'completed'],
-                    ['id' => '2', 'time' => '09:15 - 10:45', 'class_code' => 'PHYS101-01', 'subject' => 'Vật lý đại cương', 'teacher' => 'PGS. Trần Thị B', 'room' => 'B203', 'date' => date('d/m/Y'), 'present' => 0, 'total' => 38, 'status' => 'ongoing'],
-                    ['id' => '3', 'time' => '13:30 - 15:00', 'class_code' => 'CS201-01', 'subject' => 'Lập trình web', 'teacher' => 'ThS. Phạm Văn C', 'room' => 'C105', 'date' => date('d/m/Y'), 'present' => 0, 'total' => 25, 'status' => 'pending'],
-                    ['id' => '4', 'time' => '15:15 - 16:45', 'class_code' => 'HYDRO101-01', 'subject' => 'Cơ sở thuỷ lực', 'teacher' => 'Prof. Lê Thị D', 'room' => 'D301', 'date' => date('d/m/Y'), 'present' => 0, 'total' => 20, 'status' => 'pending'],
+                    ['id' => '1', 'time' => '07:30 - 09:00', 'course_code' => 'MATH101', 'course_name' => 'Toán cao cấp 1', 'class_id' => 'MATH101-01', 'classroom' => 'A101', 'date' => '2025-08-01', 'start_time' => '07:30'],
+                    ['id' => '2', 'time' => '09:15 - 10:45', 'course_code' => 'PHYS101', 'course_name' => 'Vật lý đại cương', 'class_id' => 'PHYS101-01', 'classroom' => 'B203', 'date' => '2025-08-01', 'start_time' => '09:15'],
+                    ['id' => '3', 'time' => '13:30 - 15:00', 'course_code' => 'CS201', 'course_name' => 'Lập trình web', 'class_id' => 'CS201-01', 'classroom' => 'C105', 'date' => '2025-08-02', 'start_time' => '13:30'],
+                    ['id' => '4', 'time' => '15:15 - 16:45', 'course_code' => 'HYDRO101', 'course_name' => 'Cơ sở thuỷ lực', 'class_id' => 'HYDRO101-01', 'classroom' => 'D301', 'date' => '2025-08-03', 'start_time' => '15:15'],
+                    ['id' => '5', 'time' => '08:00 - 09:30', 'course_code' => 'ENG101', 'course_name' => 'Tiếng Anh cơ bản', 'class_id' => 'ENG101-01', 'classroom' => 'E102', 'date' => '2025-08-01', 'start_time' => '08:00'],
                 ];
             }
+            
+            // Apply filters
+            if (!empty($filterDate)) {
+                $schedules = array_filter($schedules, function($schedule) use ($filterDate) {
+                    $scheduleDate = $schedule['date'] ?? '';
+                    return $scheduleDate === $filterDate || date('Y-m-d', strtotime($scheduleDate)) === $filterDate;
+                });
+            }
+            
+            if (!empty($filterCourse)) {
+                $schedules = array_filter($schedules, function($schedule) use ($filterCourse) {
+                    return ($schedule['course_name'] ?? '') === $filterCourse;
+                });
+            }
+            
+            if (!empty($filterClassroom)) {
+                $schedules = array_filter($schedules, function($schedule) use ($filterClassroom) {
+                    return ($schedule['classroom'] ?? '') === $filterClassroom;
+                });
+            }
+            
+            // Reset array keys after filtering
+            $schedules = array_values($schedules);
         } catch (\Exception $e) {
             // Fallback data nếu Firebase lỗi
             $schedules = [
-                ['id' => '1', 'time' => '07:30 - 09:00', 'class_code' => 'MATH101-01', 'subject' => 'Toán cao cấp 1', 'teacher' => 'TS. Nguyễn Văn A', 'room' => 'A101', 'date' => date('d/m/Y'), 'present' => 42, 'total' => 45, 'status' => 'completed'],
-                ['id' => '2', 'time' => '09:15 - 10:45', 'class_code' => 'PHYS101-01', 'subject' => 'Vật lý đại cương', 'teacher' => 'PGS. Trần Thị B', 'room' => 'B203', 'date' => date('d/m/Y'), 'present' => 0, 'total' => 38, 'status' => 'ongoing'],
-                ['id' => '3', 'time' => '13:30 - 15:00', 'class_code' => 'CS201-01', 'subject' => 'Lập trình web', 'teacher' => 'ThS. Phạm Văn C', 'room' => 'C105', 'date' => date('d/m/Y'), 'present' => 0, 'total' => 25, 'status' => 'pending'],
-                ['id' => '4', 'time' => '15:15 - 16:45', 'class_code' => 'HYDRO101-01', 'subject' => 'Cơ sở thuỷ lực', 'teacher' => 'Prof. Lê Thị D', 'room' => 'D301', 'date' => date('d/m/Y'), 'present' => 0, 'total' => 20, 'status' => 'pending'],
+                ['id' => '1', 'time' => '07:30 - 09:00', 'course_code' => 'MATH101', 'course_name' => 'Toán cao cấp 1', 'class_id' => 'MATH101-01', 'classroom' => 'A101', 'date' => '2025-08-01', 'start_time' => '07:30'],
+                ['id' => '2', 'time' => '09:15 - 10:45', 'course_code' => 'PHYS101', 'course_name' => 'Vật lý đại cương', 'class_id' => 'PHYS101-01', 'classroom' => 'B203', 'date' => '2025-08-01', 'start_time' => '09:15'],
+                ['id' => '3', 'time' => '13:30 - 15:00', 'course_code' => 'CS201', 'course_name' => 'Lập trình web', 'class_id' => 'CS201-01', 'classroom' => 'C105', 'date' => '2025-08-02', 'start_time' => '13:30'],
+                ['id' => '4', 'time' => '15:15 - 16:45', 'course_code' => 'HYDRO101', 'course_name' => 'Cơ sở thuỷ lực', 'class_id' => 'HYDRO101-01', 'classroom' => 'D301', 'date' => '2025-08-03', 'start_time' => '15:15'],
+                ['id' => '5', 'time' => '08:00 - 09:30', 'course_code' => 'ENG101', 'course_name' => 'Tiếng Anh cơ bản', 'class_id' => 'ENG101-01', 'classroom' => 'E102', 'date' => '2025-08-01', 'start_time' => '08:00'],
             ];
+            
+            // Apply same filters to fallback data
+            if (!empty($filterDate)) {
+                $schedules = array_filter($schedules, function($schedule) use ($filterDate) {
+                    return $schedule['date'] === $filterDate;
+                });
+            }
+            
+            if (!empty($filterCourse)) {
+                $schedules = array_filter($schedules, function($schedule) use ($filterCourse) {
+                    return $schedule['course_name'] === $filterCourse;
+                });
+            }
+            
+            if (!empty($filterClassroom)) {
+                $schedules = array_filter($schedules, function($schedule) use ($filterClassroom) {
+                    return $schedule['classroom'] === $filterClassroom;
+                });
+            }
+            
+            $schedules = array_values($schedules);
         }
         
         return view('lich_hoc_va_diem_danh', compact('schedules'));

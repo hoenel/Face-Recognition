@@ -92,14 +92,14 @@ class FirebaseService
                         $studentIds = $docData['student_ids'] ?? [];
                         $classes[] = [
                             'id' => $docData['id'],
-                            'code' => $docData['id'],
-                            'subject' => $docData['class_name'] ?? '',
+                            'code' => $docData['id'], // Sử dụng document ID làm mã lớp
+                            'subject' => $docData['class_name'] ?? '', // Đúng field name từ Firebase
                             'instructor' => $this->getTeacherName($docData['teacher_id'] ?? ''),
-                            'room' => 'A101',
-                            'schedule' => 'T2,T4,T6 (07:30-09:00)',
+                            'room' => 'TBA', // Chưa có field này trong Firebase
+                            'schedule' => 'Chưa xếp lịch', // Chưa có field này trong Firebase  
                             'students' => is_array($studentIds) ? count($studentIds) : 0,
-                            'max_students' => 50,
-                            'status' => 'active'
+                            'max_students' => 50, // Default value
+                            'status' => 'active' // Default status
                         ];
                     }
                 }
@@ -188,16 +188,37 @@ class FirebaseService
                 if (isset($data['documents'])) {
                     foreach ($data['documents'] as $document) {
                         $docData = $this->parseFirestoreDocument($document);
-                        $schedules[] = [
-                            'id' => $docData['id'],
-                            'course_code' => $docData['course_code'] ?? '',
-                            'course_name' => $docData['course_name'] ?? '',
-                            'class_id' => $docData['class_id'] ?? '',
-                            'classroom' => $docData['classroom'] ?? '',
-                            'date' => $docData['date'] ?? '',
-                            'start_time' => $docData['start_time'] ?? '',
-                            'schedule_sessions' => $docData['schedule_sessions'] ?? []
-                        ];
+                        
+                        // Handle nested schedule_sessions array
+                        $scheduleSessions = $docData['schedule_sessions'] ?? [];
+                        
+                        // Create a schedule entry for each session in the array
+                        if (is_array($scheduleSessions) && !empty($scheduleSessions)) {
+                            foreach ($scheduleSessions as $index => $session) {
+                                $schedules[] = [
+                                    'id' => $docData['id'] . '_' . $index,
+                                    'course_code' => $session['course_code'] ?? '',
+                                    'course_name' => $session['course_name'] ?? '',
+                                    'class_id' => $session['class_id'] ?? '',
+                                    'classroom' => $session['classroom'] ?? '',
+                                    'date' => $session['date'] ?? '',
+                                    'start_time' => $session['start_time'] ?? '',
+                                    'schedule_sessions' => [$session] // Wrap single session in array
+                                ];
+                            }
+                        } else {
+                            // Fallback for documents without schedule_sessions
+                            $schedules[] = [
+                                'id' => $docData['id'],
+                                'course_code' => $docData['course_code'] ?? '',
+                                'course_name' => $docData['course_name'] ?? '',
+                                'class_id' => $docData['class_id'] ?? '',
+                                'classroom' => $docData['classroom'] ?? '',
+                                'date' => $docData['date'] ?? '',
+                                'start_time' => $docData['start_time'] ?? '',
+                                'schedule_sessions' => []
+                            ];
+                        }
                     }
                 }
             }
@@ -222,9 +243,28 @@ class FirebaseService
                 } elseif (isset($value['booleanValue'])) {
                     $data[$key] = $value['booleanValue'];
                 } elseif (isset($value['arrayValue']['values'])) {
-                    $data[$key] = array_map(function($item) {
-                        return $item['stringValue'] ?? $item;
-                    }, $value['arrayValue']['values']);
+                    // Handle array of objects (like schedule_sessions)
+                    $arrayData = [];
+                    foreach ($value['arrayValue']['values'] as $arrayItem) {
+                        if (isset($arrayItem['mapValue']['fields'])) {
+                            // Parse nested object
+                            $nestedData = [];
+                            foreach ($arrayItem['mapValue']['fields'] as $nestedKey => $nestedValue) {
+                                if (isset($nestedValue['stringValue'])) {
+                                    $nestedData[$nestedKey] = $nestedValue['stringValue'];
+                                } elseif (isset($nestedValue['integerValue'])) {
+                                    $nestedData[$nestedKey] = (int)$nestedValue['integerValue'];
+                                } elseif (isset($nestedValue['booleanValue'])) {
+                                    $nestedData[$nestedKey] = $nestedValue['booleanValue'];
+                                }
+                            }
+                            $arrayData[] = $nestedData;
+                        } elseif (isset($arrayItem['stringValue'])) {
+                            // Simple string array
+                            $arrayData[] = $arrayItem['stringValue'];
+                        }
+                    }
+                    $data[$key] = $arrayData;
                 }
             }
         }

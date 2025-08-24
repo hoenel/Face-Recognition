@@ -14,41 +14,49 @@
     <!-- Search and Filter -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" placeholder="Tìm kiếm lớp học...">
+            <form method="GET" action="{{ route('classes.index') }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Tìm kiếm lớp học..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="subject" class="form-control">
+                            <option value="">Tất cả môn học</option>
+                            @php
+                                $subjects = array_unique(array_column($classes, 'subject'));
+                            @endphp
+                            @foreach($subjects as $subject)
+                                <option value="{{ $subject }}" {{ request('subject') == $subject ? 'selected' : '' }}>{{ $subject }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="instructor" class="form-control">
+                            <option value="">Tất cả giảng viên</option>
+                            @php
+                                $instructors = array_unique(array_column($classes, 'instructor'));
+                            @endphp
+                            @foreach($instructors as $instructor)
+                                <option value="{{ $instructor }}" {{ request('instructor') == $instructor ? 'selected' : '' }}>{{ $instructor }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-control">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang diễn ra</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chưa bắt đầu</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Đã kết thúc</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="room" class="form-control" placeholder="Phòng học..." value="{{ request('room') }}">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-outline-primary w-100">Tìm</button>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-control">
-                        <option>Tất cả môn học</option>
-                        <option>Toán cao cấp 1</option>
-                        <option>Vật lý đại cương</option>
-                        <option>Lập trình web</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-control">
-                        <option>Tất cả giảng viên</option>
-                        <option>Nguyễn Văn A</option>
-                        <option>Trần Thị B</option>
-                        <option>Phạm Văn C</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-control">
-                        <option>Tất cả trạng thái</option>
-                        <option>Đang diễn ra</option>
-                        <option>Chưa bắt đầu</option>
-                        <option>Đã kết thúc</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <input type="date" class="form-control">
-                </div>
-                <div class="col-md-1">
-                    <button class="btn btn-outline-primary w-100">Tìm</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
     

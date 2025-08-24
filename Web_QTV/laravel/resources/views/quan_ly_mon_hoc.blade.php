@@ -14,44 +14,48 @@
     <!-- Search and Filter -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" placeholder="Tìm kiếm theo tên môn...">
+            <form method="GET" action="{{ route('subjects.index') }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Tìm kiếm theo tên môn..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="department" class="form-control">
+                            <option value="">Tất cả ngành</option>
+                            @php
+                                $departments = array_unique(array_column($subjects, 'department'));
+                            @endphp
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="credits" class="form-control">
+                            <option value="">Tất cả tín chỉ</option>
+                            <option value="1" {{ request('credits') == '1' ? 'selected' : '' }}>1 tín chỉ</option>
+                            <option value="2" {{ request('credits') == '2' ? 'selected' : '' }}>2 tín chỉ</option>
+                            <option value="3" {{ request('credits') == '3' ? 'selected' : '' }}>3 tín chỉ</option>
+                            <option value="4" {{ request('credits') == '4' ? 'selected' : '' }}>4 tín chỉ</option>
+                            <option value="5" {{ request('credits') == '5' ? 'selected' : '' }}>5+ tín chỉ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-control">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang mở</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Tạm dừng</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Ngừng giảng dạy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="code" class="form-control" placeholder="Mã môn học..." value="{{ request('code') }}">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-outline-primary w-100">Tìm</button>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-control">
-                        <option>Tất cả ngành</option>
-                        <option>Khoa Cơ bản</option>
-                        <option>Khoa Công nghệ thông tin</option>
-                        <option>Khoa Thuỷ lợi</option>
-                        <option>Khoa Cơ khí</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-control">
-                        <option>Tất cả tín chỉ</option>
-                        <option>1 tín chỉ</option>
-                        <option>2 tín chỉ</option>
-                        <option>3 tín chỉ</option>
-                        <option>4 tín chỉ</option>
-                        <option>5+ tín chỉ</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-control">
-                        <option>Tất cả trạng thái</option>
-                        <option>Đang mở</option>
-                        <option>Tạm dừng</option>
-                        <option>Ngừng giảng dạy</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" placeholder="Mã môn học...">
-                </div>
-                <div class="col-md-1">
-                    <button class="btn btn-outline-primary w-100">Tìm</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
     
@@ -65,7 +69,7 @@
                             <th>Mã môn</th>
                             <th>Tên môn học</th>
                             <th>Số tín chỉ</th>
-                            <th>Ngành học</th>
+                            <th>Giảng viên</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
@@ -75,7 +79,7 @@
                             <td><strong>{{ $subject['code'] }}</strong></td>
                             <td>{{ $subject['name'] }}</td>
                             <td><span class="badge bg-info">{{ $subject['credits'] }}</span></td>
-                            <td>{{ $subject['department'] }}</td>
+                            <td>{{ $subject['teacher'] ?? 'Chưa phân công' }}</td>
                             <td>
                                 <button class="btn btn-sm btn-success me-1">
                                     <i class="fas fa-edit"></i> Sửa
