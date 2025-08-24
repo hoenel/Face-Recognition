@@ -19,8 +19,8 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 180px;
-            background-color: #365d7d;
+            width: 220px;
+            background-color: #2c4a6b;
             overflow-y: auto;
             z-index: 1000;
             display: flex;
@@ -75,7 +75,7 @@
         }
         
         .main-content {
-            margin-left: 180px;
+            margin-left: 220px;
             min-height: 100vh;
             padding: 20px;
             background-color: #f5f5f5;
@@ -150,14 +150,11 @@
                 <i class="fas fa-chart-bar"></i>
                 Xuất báo cáo
             </a>
-        </nav>
-        
-        <div class="nav-bottom">
             <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng xuất
             </a>
-        </div>
+        </nav>
         
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf

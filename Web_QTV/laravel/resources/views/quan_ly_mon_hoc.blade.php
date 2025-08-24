@@ -11,6 +11,50 @@
         </button>
     </div>
     
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm theo tên môn...">
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control">
+                        <option>Tất cả ngành</option>
+                        <option>Khoa Cơ bản</option>
+                        <option>Khoa Công nghệ thông tin</option>
+                        <option>Khoa Thuỷ lợi</option>
+                        <option>Khoa Cơ khí</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control">
+                        <option>Tất cả tín chỉ</option>
+                        <option>1 tín chỉ</option>
+                        <option>2 tín chỉ</option>
+                        <option>3 tín chỉ</option>
+                        <option>4 tín chỉ</option>
+                        <option>5+ tín chỉ</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control">
+                        <option>Tất cả trạng thái</option>
+                        <option>Đang mở</option>
+                        <option>Tạm dừng</option>
+                        <option>Ngừng giảng dạy</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" placeholder="Mã môn học...">
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-primary w-100">Tìm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Table -->
     <div class="card">
         <div class="card-body p-0">
