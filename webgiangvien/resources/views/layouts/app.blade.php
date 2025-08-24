@@ -5,16 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <style>
-        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
-        .sidebar { min-height: 100vh; background-color: #1f2a44; color: #fff; padding: 20px; }
-        .sidebar h4 { color: #ecf0f1; font-weight: bold; text-align: center; }
-        .sidebar a { display: block; padding: 10px; color: #bdc3c7; text-decoration: none; border-radius: 5px; margin-bottom: 10px; }
-        .sidebar a.active, .sidebar a:hover { background: #34495e; color: #fff; }
-        .main-content { padding: 30px; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #f8fafc;
+        }
+        .sidebar {
+            min-height: 100vh;
+            width: 220px;
+            background: linear-gradient(180deg, #243B55, #141E30);
+            color: #fff;
+            padding: 30px 10px 10px 10px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+            position: fixed;
+            top: 0; left: 0;
+            border-radius: 0 20px 20px 0;
+        }
+        .sidebar h4 {
+            color: #ecf0f1;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+        .sidebar a {
+            display: block;
+            padding: 12px 18px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .sidebar a.active, .sidebar a:hover {
+            background: #2e3d5c;
+            color: #fff;
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 40px 30px;
+        }
     </style>
     @yield('head')
 </head>
