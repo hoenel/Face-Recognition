@@ -132,11 +132,11 @@
             </a>
             <a class="nav-link {{ request()->routeIs('subjects.*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
                 <i class="fas fa-book"></i>
-                Quản lý học phần
+                Quản lý môn học
             </a>
             <a class="nav-link {{ request()->routeIs('classes.*') ? 'active' : '' }}" href="{{ route('classes.index') }}">
                 <i class="fas fa-chalkboard-teacher"></i>
-                Quản lý môn học
+                Quản lý lớp học phần
             </a>
             <a class="nav-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}" href="{{ route('schedules.index') }}">
                 <i class="fas fa-calendar-alt"></i>

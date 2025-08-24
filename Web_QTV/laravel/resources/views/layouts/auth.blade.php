@@ -21,11 +21,11 @@
         }
         
         .login-container {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 350px;
             width: 100%;
         }
         
@@ -36,21 +36,23 @@
         
         .login-header h1 {
             color: #007bff;
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 1.5rem;
+            font-weight: 500;
             margin-bottom: 5px;
         }
         
         .login-header p {
             color: #6c757d;
             margin: 0;
+            font-size: 0.9rem;
         }
         
         .form-control {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 12px 15px;
-            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
         }
         
         .form-control:focus {
@@ -62,10 +64,11 @@
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 4px;
+            padding: 10px;
             width: 100%;
-            font-weight: 500;
+            font-weight: 400;
+            font-size: 0.9rem;
             transition: background-color 0.3s;
         }
         
@@ -74,35 +77,8 @@
             color: white;
         }
         
-        .demo-accounts {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .demo-accounts h6 {
-            color: #495057;
-            margin-bottom: 15px;
-        }
-        
-        .demo-account {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 8px 10px;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .demo-account i {
-            margin-right: 8px;
-            color: #007bff;
-        }
-        
         .alert {
-            border-radius: 8px;
+            border-radius: 4px;
             margin-bottom: 20px;
         }
     </style>

@@ -8,7 +8,7 @@ Route::get('/', function () {
     if (session('logged_in')) {
         return redirect('/dashboard');
     }
-    return view('login');
+    return view('dang_nhap');
 });
 
 // Login routes
@@ -16,7 +16,7 @@ Route::get('/login', function () {
     if (session('logged_in')) {
         return redirect('/dashboard');
     }
-    return view('login');
+    return view('dang_nhap');
 })->name('login');
 
 Route::post('/login', function () {
@@ -67,7 +67,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             ['time' => '10:45 - 23/08/2025', 'action' => 'Cập nhật thông tin môn học', 'user' => 'Trần Thị B'],
         ];
         
-        return view('dashboard', compact('stats', 'recent_activities'));
+        return view('trang_chu', compact('stats', 'recent_activities'));
     })->name('dashboard');
     
     // Quản lí tài khoản với dữ liệu test Firebase
@@ -80,7 +80,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             ['id' => 4, 'name' => 'Lê Thị D', 'email' => 'student1@htd.edu.vn', 'role' => 'student', 'status' => 'inactive', 'created_at' => '18/08/2025'],
         ];
         
-        return view('accounts', compact('accounts'));
+        return view('quan_ly_tai_khoan', compact('accounts'));
     })->name('accounts.index');
     
     // Quản lí môn học với dữ liệu test Firebase
@@ -94,7 +94,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             ['code' => 'MECH101', 'name' => 'Cơ học kỹ thuật', 'credits' => 4, 'department' => 'Khoa Cơ khí', 'semester' => 'Học kỳ 1', 'status' => 'completed'],
         ];
         
-        return view('subjects', compact('subjects'));
+        return view('quan_ly_mon_hoc', compact('subjects'));
     })->name('subjects.index');
     
     // Quản lí lớp học phần với dữ liệu test Firebase
@@ -108,7 +108,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             ['code' => 'MECH101-01', 'subject' => 'Cơ học kỹ thuật', 'teacher' => 'TS. Hoàng Văn E', 'room' => 'E201', 'schedule' => 'T5,T7 (07:30-09:00)', 'students' => '35/40', 'status' => 'completed'],
         ];
         
-        return view('classes', compact('classes'));
+        return view('quan_ly_lop_hoc_phan', compact('classes'));
     })->name('classes.index');
     
     // Lịch học và điểm danh với dữ liệu test Firebase
@@ -121,7 +121,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             ['time' => '15:15 - 16:45', 'class_code' => 'HYDRO101-01', 'subject' => 'Cơ sở thuỷ lực', 'teacher' => 'Prof. Lê Thị D', 'room' => 'D301', 'present' => 0, 'total' => 20, 'status' => 'pending'],
         ];
         
-        return view('schedules', compact('schedules'));
+        return view('lich_hoc_va_diem_danh', compact('schedules'));
     })->name('schedules.index');
     
     // Xuất báo cáo với dữ liệu test Firebase
@@ -133,7 +133,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             ['name' => 'Báo cáo môn học học kỳ 1', 'type' => 'subject', 'creator' => 'Phạm Văn C', 'created_at' => '20/08/2025 09:45', 'status' => 'processing'],
         ];
         
-        return view('reports', compact('reports'));
+        return view('xuat_bao_cao', compact('reports'));
     })->name('reports.index');
     
     // Kiểm tra dữ liệu với dữ liệu test Firebase
@@ -155,7 +155,7 @@ Route::middleware([SimpleAuth::class])->group(function () {
             'today_errors' => 2
         ];
         
-        return view('data-check', compact('system_stats'));
+        return view('kiem_tra_du_lieu', compact('system_stats'));
     })->name('data-check');
     
 });

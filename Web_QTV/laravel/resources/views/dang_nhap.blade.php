@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="login-header">
-    <h1>HTD</h1>
-    <p>Hệ thống điểm danh khuôn mặt</p>
+    <h1>HTD - điểm danh</h1>
+    <p>Đăng nhập hệ thống</p>
 </div>
 
 @if(session('error'))
@@ -26,20 +26,4 @@
     
     <button type="submit" class="btn btn-login">Đăng nhập</button>
 </form>
-
-<div class="demo-accounts">
-    <h6>Tài khoản demo:</h6>
-    <div class="demo-account">
-        <i class="fas fa-user-shield"></i>
-        admin@htd.edu.vn - <i class="fas fa-key"></i> 123456
-    </div>
-    <div class="demo-account">
-        <i class="fas fa-user"></i>
-        demo@example.com - <i class="fas fa-key"></i> 123456
-    </div>
-    <div class="demo-account">
-        <i class="fas fa-chalkboard-teacher"></i>
-        teacher@htd.edu.vn - <i class="fas fa-key"></i> 123456
-    </div>
-</div>
 @endsection
