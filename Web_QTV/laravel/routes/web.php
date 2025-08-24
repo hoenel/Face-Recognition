@@ -83,16 +83,33 @@ Route::middleware([SimpleAuth::class])->group(function () {
         return view('quan_ly_tai_khoan', compact('accounts'));
     })->name('accounts.index');
     
-    // Quản lí môn học với dữ liệu test Firebase
+    // Quản lí môn học với dữ liệu Firebase thực
     Route::get('/subjects', function () {
-        // Dữ liệu test từ Firebase
-        $subjects = [
-            ['code' => 'MATH101', 'name' => 'Toán cao cấp 1', 'credits' => 3, 'department' => 'Khoa Cơ bản', 'semester' => 'Học kỳ 1', 'status' => 'active'],
-            ['code' => 'PHYS101', 'name' => 'Vật lý đại cương', 'credits' => 4, 'department' => 'Khoa Cơ bản', 'semester' => 'Học kỳ 1', 'status' => 'active'],
-            ['code' => 'CS201', 'name' => 'Lập trình web', 'credits' => 3, 'department' => 'Khoa Công nghệ thông tin', 'semester' => 'Học kỳ 2', 'status' => 'pending'],
-            ['code' => 'HYDRO101', 'name' => 'Cơ sở thuỷ lực', 'credits' => 3, 'department' => 'Khoa Thuỷ lợi', 'semester' => 'Học kỳ 1', 'status' => 'active'],
-            ['code' => 'MECH101', 'name' => 'Cơ học kỹ thuật', 'credits' => 4, 'department' => 'Khoa Cơ khí', 'semester' => 'Học kỳ 1', 'status' => 'completed'],
-        ];
+        $firebase = app(\App\Services\FirebaseService::class);
+        
+        try {
+            $subjects = $firebase->getCourses();
+            
+            // Nếu không có dữ liệu từ Firebase, dùng fallback
+            if (empty($subjects)) {
+                $subjects = [
+                    ['id' => '1', 'code' => 'MATH101', 'name' => 'Toán cao cấp 1', 'credits' => 3, 'department' => 'Khoa Cơ bản', 'teacher' => 'TS. Nguyễn A', 'status' => 'active'],
+                    ['id' => '2', 'code' => 'PHYS101', 'name' => 'Vật lý đại cương', 'credits' => 4, 'department' => 'Khoa Cơ bản', 'teacher' => 'PGS. Trần B', 'status' => 'active'],
+                    ['id' => '3', 'code' => 'CS201', 'name' => 'Lập trình web', 'credits' => 3, 'department' => 'Khoa CNTT', 'teacher' => 'ThS. Phạm C', 'status' => 'pending'],
+                    ['id' => '4', 'code' => 'HYDRO101', 'name' => 'Cơ sở thuỷ lực', 'credits' => 3, 'department' => 'Khoa Thuỷ lợi', 'teacher' => 'Prof. Lê D', 'status' => 'active'],
+                    ['id' => '5', 'code' => 'MECH101', 'name' => 'Cơ học kỹ thuật', 'credits' => 4, 'department' => 'Khoa Cơ khí', 'teacher' => 'TS. Hoàng E', 'status' => 'completed'],
+                ];
+            }
+        } catch (\Exception $e) {
+            // Fallback data nếu Firebase lỗi
+            $subjects = [
+                ['id' => '1', 'code' => 'MATH101', 'name' => 'Toán cao cấp 1', 'credits' => 3, 'department' => 'Khoa Cơ bản', 'teacher' => 'TS. Nguyễn A', 'status' => 'active'],
+                ['id' => '2', 'code' => 'PHYS101', 'name' => 'Vật lý đại cương', 'credits' => 4, 'department' => 'Khoa Cơ bản', 'teacher' => 'PGS. Trần B', 'status' => 'active'],
+                ['id' => '3', 'code' => 'CS201', 'name' => 'Lập trình web', 'credits' => 3, 'department' => 'Khoa CNTT', 'teacher' => 'ThS. Phạm C', 'status' => 'pending'],
+                ['id' => '4', 'code' => 'HYDRO101', 'name' => 'Cơ sở thuỷ lực', 'credits' => 3, 'department' => 'Khoa Thuỷ lợi', 'teacher' => 'Prof. Lê D', 'status' => 'active'],
+                ['id' => '5', 'code' => 'MECH101', 'name' => 'Cơ học kỹ thuật', 'credits' => 4, 'department' => 'Khoa Cơ khí', 'teacher' => 'TS. Hoàng E', 'status' => 'completed'],
+            ];
+        }
         
         return view('quan_ly_mon_hoc', compact('subjects'));
     })->name('subjects.index');
@@ -158,4 +175,51 @@ Route::middleware([SimpleAuth::class])->group(function () {
         return view('kiem_tra_du_lieu', compact('system_stats'));
     })->name('data-check');
     
+});
+
+// Test Firebase Connection
+Route::get('/test-firebase', function () {
+    $firebase = app(\App\Services\FirebaseService::class);
+    
+    try {
+        $courses = $firebase->getCourses();
+        $classes = $firebase->getClasses();
+        $students = $firebase->getStudents();
+        $users = $firebase->getUsers();
+        $schedules = $firebase->getSchedules();
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Firebase connected successfully!',
+            'data' => [
+                'courses' => [
+                    'count' => count($courses),
+                    'sample' => array_slice($courses, 0, 3)
+                ],
+                'classes' => [
+                    'count' => count($classes),
+                    'sample' => array_slice($classes, 0, 3)
+                ],
+                'students' => [
+                    'count' => count($students),
+                    'sample' => array_slice($students, 0, 3)
+                ],
+                'users' => [
+                    'count' => count($users),
+                    'sample' => array_slice($users, 0, 3)
+                ],
+                'schedules' => [
+                    'count' => count($schedules),
+                    'sample' => array_slice($schedules, 0, 3)
+                ]
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Firebase connection failed: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
 });
