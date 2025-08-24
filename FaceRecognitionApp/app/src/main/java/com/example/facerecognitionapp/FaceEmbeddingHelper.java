@@ -55,7 +55,7 @@ public class FaceEmbeddingHelper {
             }
         }
 
-        float[][] embedding = new float[1][128];
+        float[][] embedding = new float[1][512];
         interpreter.run(input, embedding);
 
         return embedding[0];

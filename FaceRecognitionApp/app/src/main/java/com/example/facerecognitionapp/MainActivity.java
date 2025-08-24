@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Ví dụ: check quyền camera khi mở app
         checkCameraPermission();
     }
 
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        // TODO: viết code mở camera ở đây
         Toast.makeText(this, "Camera opened!", Toast.LENGTH_SHORT).show();
     }
 
