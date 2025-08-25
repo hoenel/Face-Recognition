@@ -15,6 +15,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText edtEmail, edtPassword;
@@ -25,6 +28,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
+    private FirebaseFirestore db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         edtEmail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
@@ -65,13 +71,39 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            checkIfStudent(user.getUid());
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: Email hoặc mật khẩu sai!", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void checkIfStudent(String uid) {
+        DocumentReference userRef = db.collection("users").document(uid);
+        userRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult() != null && task.getResult().exists()) {
+                    if (task.getResult().contains("student_id")) {
                         Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: Email hoặc mật khẩu sai! ", Toast.LENGTH_LONG).show();
+
+                        mAuth.signOut();
+                        Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: Tài khoản không hợp lệ!", Toast.LENGTH_LONG).show();
                     }
-                });
+                } else {
+                    mAuth.signOut();
+                    Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: Tài khoản không tồn tại!", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                mAuth.signOut();
+                Toast.makeText(LoginActivity.this, "Lỗi: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
