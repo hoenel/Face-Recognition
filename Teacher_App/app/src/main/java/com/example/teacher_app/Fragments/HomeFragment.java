@@ -62,11 +62,10 @@ public class HomeFragment extends Fragment {
         db.collection("users").document(uid).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 String name = documentSnapshot.getString("name");
-                String teacherId = documentSnapshot.getString("teacher_id"); // 👈 lấy teacher_id
+                String teacherId = documentSnapshot.getString("teacher_id");
 
                 tvWelcome.setText("Xin chào, " + name + " !");
 
-                // Ví dụ: in log hoặc dùng teacherId cho app giảng viên
                 Log.d("Firestore", "Teacher ID: " + teacherId);
             }
                 });

@@ -6,7 +6,7 @@
     <item
         android:id="@+id/nav_schedule"
         android:icon="@drawable/ic_schedule0"
-        android:title="Lịch học" />
+        android:title="Lịch giảng dạy" />
     <item
         android:id="@+id/nav_notification"
         android:icon="@drawable/ic_notification"
