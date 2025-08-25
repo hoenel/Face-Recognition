@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserProfileActivity extends AppCompatActivity {
-    private TextView tvFullName, tvBirth, tvAddress, tvClass, tvMajor;
+    private TextView tvFullName, tvBirth, tvAddress, tvClass;
     private FirebaseFirestore db;
 
     @Override
@@ -24,7 +24,6 @@ public class UserProfileActivity extends AppCompatActivity {
         tvBirth = findViewById(R.id.tvBirth);
         tvAddress = findViewById(R.id.tvAddress);
         tvClass = findViewById(R.id.tvClass);
-        tvMajor = findViewById(R.id.tvMajor);
 
         db = FirebaseFirestore.getInstance();
 
@@ -41,9 +40,9 @@ public class UserProfileActivity extends AppCompatActivity {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String studentId = documentSnapshot.getString("student_id");
-                        if (studentId != null) {
-                            loadStudentData(studentId);
+                        String teachedID = documentSnapshot.getString("teacher_id");
+                        if (teachedID != null) {
+                            loadStudentData(teachedID);
                         }
                     }
                 })
@@ -52,20 +51,18 @@ public class UserProfileActivity extends AppCompatActivity {
                 });
     }
 
-    private void loadStudentData(String studentId) {
-        db.collection("students").document(studentId).get()
+    private void loadStudentData(String teacherId) {
+        db.collection("teachers").document(teacherId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String name = documentSnapshot.getString("name");
                         String dob = documentSnapshot.getString("date_of_birth");
                         String classId = documentSnapshot.getString("class_id");
-                        String fieldOfStudy = documentSnapshot.getString("field_of_study");
                         String address = documentSnapshot.getString("hometown");
 
                         tvFullName.setText("Họ và tên: " + name);
                         tvBirth.setText("Ngày sinh: " + dob);
                         tvClass.setText("Lớp: " + classId);
-                        tvMajor.setText("Ngành: " + fieldOfStudy);
                         tvAddress.setText("Quê quán: " + address);
                     }
                 })

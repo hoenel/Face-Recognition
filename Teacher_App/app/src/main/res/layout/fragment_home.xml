@@ -60,50 +60,6 @@
 
 
     <LinearLayout
-        android:id="@+id/btn_attendance"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_corner"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:padding="20dp">
-
-        <ImageView
-            android:id="@+id/imgFaceId"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="20dp"
-            android:src="@drawable/ic_faceid" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Điểm danh"
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="để bắt đầu giờ học!"
-                android:textColor="@android:color/white"
-                android:textSize="12sp"/>
-        </LinearLayout>
-    </LinearLayout>
-
-
-    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -135,7 +91,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lịch học"
+                    android:text="Lịch giảng dạy"
                     android:textSize="14sp"
                     android:fontFamily="@font/poppins_bold"
                     android:textColor="#000000"
@@ -160,7 +116,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Báo nghỉ"
+                    android:text="Kiểm tra báo nghỉ"
                     android:fontFamily="@font/poppins_bold"
                     android:textColor="#000000"
                     android:textSize="14sp"
@@ -192,10 +148,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lịch sử"
+                    android:text="Trạng thái điểm danh"
                     android:fontFamily="@font/poppins_bold"
                     android:textColor="#000000"
-                    android:textSize="14sp"
+                    android:textSize="10sp"
                     android:layout_marginTop="6dp"/>
             </LinearLayout>
 

@@ -62,7 +62,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ChimCanhCut"
+            android:text="ChimCanhCut - Giảng viên"
             android:textStyle="bold"
             android:textSize="25sp"
             android:textColor="#222222"
