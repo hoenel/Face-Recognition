@@ -135,43 +135,6 @@
     </LinearLayout>
 
     <!-- Item 4 -->
-    <LinearLayout
-        android:id="@+id/item_face_register"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:background="#F2F2F2"
-        android:gravity="center_vertical"
-        android:layout_marginTop="1dp">
-
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_face" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:text="Đăng ký khuôn mặt"
-                android:textSize="16sp"
-                android:textColor="#000000"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:text="Đăng ký khuôn mặt"
-                android:textSize="12sp"
-                android:textColor="#777777"/>
-        </LinearLayout>
-    </LinearLayout>
 
     <!-- Item 5 -->
     <LinearLayout

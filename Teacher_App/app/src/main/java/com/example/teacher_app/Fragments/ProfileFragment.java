@@ -36,7 +36,6 @@ public class ProfileFragment extends Fragment {
 
         item_username = view.findViewById(R.id.item_username);
         item_feedback = view.findViewById(R.id.item_feedback);
-        item_face_register = view.findViewById(R.id.item_face_register);
         item_logout = view.findViewById(R.id.item_logout);
 
         item_username.setOnClickListener(new View.OnClickListener() {
