@@ -10,3 +10,11 @@
 
 24/8: Nhóm làm app cho giảng viên. 
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/744f3f5d-8909-4722-8cf8-97970612947f" />
+25/8 mở rộng bằng cách làm thêm app giảng viên
+copy đa số nhưng phần đã làm từ app điểm danh:
+những công việc làm thêm:
+1. login
+2. trang chủ
+3. profile fragment:    - thông tin cá nhân
+			- thay báo lỗi thành báo nghỉ
+			- xoá linear layout đăng ký khuôn mặt
