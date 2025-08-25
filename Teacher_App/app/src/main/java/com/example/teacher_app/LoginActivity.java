@@ -12,6 +12,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText edtEmail, edtPassword;
@@ -62,12 +63,38 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        // Lấy uid của user đăng nhập
+                        String uid = mAuth.getCurrentUser().getUid();
+
+                        // Kiểm tra trong Firestore
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        db.collection("users").document(uid).get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    if (documentSnapshot.exists()) {
+                                        String teacherId = documentSnapshot.getString("teacher_id");
+
+                                        if (teacherId != null && !teacherId.isEmpty()) {
+                                            // ✅ Có teacher_id → cho vào MainActivity
+                                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            // ❌ Không có teacher_id → chặn
+                                            Toast.makeText(LoginActivity.this, "Tài khoản không phải giảng viên!", Toast.LENGTH_LONG).show();
+                                            FirebaseAuth.getInstance().signOut();
+                                        }
+                                    } else {
+                                        Toast.makeText(LoginActivity.this, "Tài khoản không tồn tại trong hệ thống!", Toast.LENGTH_LONG).show();
+                                        FirebaseAuth.getInstance().signOut();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(LoginActivity.this, "Lỗi kiểm tra quyền đăng nhập!", Toast.LENGTH_SHORT).show();
+                                    FirebaseAuth.getInstance().signOut();
+                                });
                     } else {
-                        Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: Email hoặc mật khẩu sai! ", Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: Email hoặc mật khẩu sai!", Toast.LENGTH_LONG).show();
                     }
                 });
     }

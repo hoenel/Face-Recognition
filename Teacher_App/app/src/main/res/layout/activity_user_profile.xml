@@ -52,7 +52,7 @@
             android:id="@+id/tvFullName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Họ và tên: Lê Hoàn"
+            android:text="Họ và tên: KTZ"
             android:textSize="14sp"
             android:textColor="@android:color/black" />
 
@@ -60,7 +60,7 @@
             android:id="@+id/tvBirth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ngày sinh: 06/01/2003"
+            android:text="Ngày sinh: 06/01/1990"
             android:textSize="14sp"
             android:textColor="@android:color/black" />
 
@@ -76,15 +76,7 @@
             android:id="@+id/tvClass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lớp: 63CNTT.VA"
-            android:textSize="14sp"
-            android:textColor="@android:color/black" />
-
-        <TextView
-            android:id="@+id/tvMajor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ngành: Công nghệ thông tin"
+            android:text="Giáo viên quản lý lớp: 63CNTT.VA"
             android:textSize="14sp"
             android:textColor="@android:color/black" />
 
