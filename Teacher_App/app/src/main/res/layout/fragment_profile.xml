@@ -81,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:text="Đóng góp ý kiến, báo lỗi"
+                android:text="Gửi thông báo cho sinh viên"
                 android:textSize="16sp"
                 android:textColor="#000000"/>
 
@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:text="Đóng góp ý kiến, báo lỗi"
+                android:text="Thông báo thông tin cho sinh viên"
                 android:textSize="12sp"
                 android:textColor="#777777"/>
         </LinearLayout>

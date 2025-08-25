@@ -52,7 +52,7 @@ public class FaceAttendanceActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Tái sử dụng layout của màn hình đăng ký
+
         setContentView(R.layout.activity_face_register);
 
         previewView = findViewById(R.id.previewView);
@@ -154,11 +154,11 @@ public class FaceAttendanceActivity extends AppCompatActivity {
 
         runOnUiThread(() -> {
             if (similarity > SIMILARITY_THRESHOLD) {
-                Toast.makeText(this, "Điểm danh thành công!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Điểm danh thành công!" + String.format("%.2f", similarity), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Ảnh không khớp! Vui lòng thử lại. Độ tương đồng: " + String.format("%.2f", similarity), Toast.LENGTH_LONG).show();
             }
-            finish(); // Đóng activity sau khi có kết quả
+            finish(); 
         });
     }
 
