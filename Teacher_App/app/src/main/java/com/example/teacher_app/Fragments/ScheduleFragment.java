@@ -142,7 +142,7 @@ public class ScheduleFragment extends Fragment {
 
 
                                     if (sessionCourseCode != null && teacherCourseCode.trim().equalsIgnoreCase(sessionCourseCode.trim())) {
-                                        
+
                                         String subject = (String) sessionData.get("course_name");
                                         String time = (String) sessionData.get("start_time");
                                         String date = (String) sessionData.get("date");
