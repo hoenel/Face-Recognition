@@ -27,12 +27,12 @@ import java.util.Map;
 
 public class ScheduleFragment extends Fragment {
 
-    private static final String TAG = "ScheduleFragment";
+    // TAG dùng để lọc log trong Logcat
+    private static final String TAG = "ScheduleFragment_DEBUG";
     private RecyclerView recyclerView;
     private ScheduleAdapter scheduleAdapter;
     private List<Schedule> scheduleList;
     private FirebaseFirestore db;
-
     private FirebaseAuth mAuth;
 
     public ScheduleFragment() {
@@ -49,90 +49,123 @@ public class ScheduleFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
         recyclerView = view.findViewById(R.id.rvSchedule);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Khởi tạo danh sách và adapter
         scheduleList = new ArrayList<>();
         scheduleAdapter = new ScheduleAdapter(scheduleList);
         recyclerView.setAdapter(scheduleAdapter);
 
-        // Bắt đầu quá trình lấy dữ liệu
-        loadUserAndScheduleData();
+        Log.d(TAG, "Fragment view created. Starting data load process.");
+        loadScheduleDataForCurrentUser();
     }
 
-    private void loadUserAndScheduleData() {
+    private void loadScheduleDataForCurrentUser() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String uid = currentUser.getUid();
-
-            // Bước 1: Lấy thông tin người dùng từ collection "users" bằng UID
-            db.collection("users").document(uid).get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            // Lấy ra classId từ hồ sơ người dùng
-                            String classId = documentSnapshot.getString("class_id");
-
-                            if (classId != null && !classId.isEmpty()) {
-                                // Bước 2: Dùng classId để lấy lịch học
-                                fetchScheduleDataForClass(classId);
-                            } else {
-                                Toast.makeText(getContext(), "Hồ sơ của bạn thiếu thông tin lớp học.", Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Toast.makeText(getContext(), "Không tìm thấy hồ sơ người dùng.", Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Lỗi khi lấy thông tin người dùng: ", e);
-                        Toast.makeText(getContext(), "Lỗi khi tải hồ sơ.", Toast.LENGTH_SHORT).show();
-                    });
-        } else {
-            // Xử lý trường hợp người dùng chưa đăng nhập
-            Toast.makeText(getContext(), "Vui lòng đăng nhập để xem lịch học.", Toast.LENGTH_LONG).show();
+        if (currentUser == null) {
+            Log.e(TAG, "Current user is null. Cannot proceed.");
+            Toast.makeText(getContext(), "Vui lòng đăng nhập.", Toast.LENGTH_LONG).show();
+            return;
         }
+
+        String uid = currentUser.getUid();
+        Log.d(TAG, "Step 1: Current User UID = " + uid);
+
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(userDocument -> {
+                    if (userDocument.exists()) {
+                        String teacherId = userDocument.getString("teacher_id");
+                        Log.d(TAG, "Step 2: Found user document. teacher_id = '" + teacherId + "'");
+
+                        if (teacherId != null && !teacherId.isEmpty()) {
+                            fetchTeacherInfoAndSchedules(teacherId);
+                        } else {
+                            Log.e(TAG, "teacher_id is null or empty in users collection.");
+                            Toast.makeText(getContext(), "Hồ sơ người dùng không có mã giáo viên.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Log.e(TAG, "User document with UID '" + uid + "' does not exist.");
+                        Toast.makeText(getContext(), "Không tìm thấy hồ sơ người dùng.", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting document from 'users' collection: ", e);
+                    Toast.makeText(getContext(), "Lỗi khi tải hồ sơ người dùng.", Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void fetchScheduleDataForClass(String classId) {
-        db.collection("schedules").document(classId)
-                .get()
+    private void fetchTeacherInfoAndSchedules(String teacherId) {
+        Log.d(TAG, "Step 3: Fetching teacher info with teacher_id = '" + teacherId + "'");
+
+        db.collection("teachers").document(teacherId).get()
+                .addOnSuccessListener(teacherDocument -> {
+                    if (teacherDocument.exists()) {
+                        String classId = teacherDocument.getString("class_id");
+                        String teacherCourseCode = teacherDocument.getString("course_code");
+                        Log.d(TAG, "Step 4: Found teacher document. class_id = '" + classId + "', course_code = '" + teacherCourseCode + "'");
+
+                        if (classId != null && !classId.isEmpty() && teacherCourseCode != null && !teacherCourseCode.isEmpty()) {
+                            fetchAndFilterSchedules(classId, teacherCourseCode);
+                        } else {
+                            Log.e(TAG, "class_id or course_code is null or empty in teachers collection.");
+                            Toast.makeText(getContext(), "Hồ sơ giáo viên thiếu thông tin lớp hoặc môn học.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Log.e(TAG, "Teacher document with ID '" + teacherId + "' does not exist.");
+                        Toast.makeText(getContext(), "Không tìm thấy thông tin giáo viên.", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting document from 'teachers' collection: ", e);
+                    Toast.makeText(getContext(), "Lỗi khi tải hồ sơ giáo viên.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void fetchAndFilterSchedules(String classId, String teacherCourseCode) {
+        db.collection("schedules").document(classId).get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document != null && document.exists()) {
-                            List<Map<String, Object>> sessionsMap = (List<Map<String, Object>>) document.get("schedule_sessions");
+                            scheduleList.clear();
 
-                            if (sessionsMap != null && !sessionsMap.isEmpty()) {
-                                scheduleList.clear();
+                            // Lấy ra MẢNG từ trường "schedule_sessions"
+                            List<Map<String, Object>> sessionsList = (List<Map<String, Object>>) document.get("schedule_sessions");
+
+                            if (sessionsList != null && !sessionsList.isEmpty()) {
+
+                                for (Map<String, Object> sessionData : sessionsList) {
+                                    String sessionCourseCode = (String) sessionData.get("course_code");
 
 
-                                for (Map<String, Object> map : sessionsMap) {
-                                    // Ánh xạ dữ liệu từ Map sang đối tượng Schedule
-                                    String subject = (String) map.get("course_name");
-                                    String time = (String) map.get("start_time");
-                                    String date = (String) map.get("date");
+                                    if (sessionCourseCode != null && teacherCourseCode.trim().equalsIgnoreCase(sessionCourseCode.trim())) {
+                                        
+                                        String subject = (String) sessionData.get("course_name");
+                                        String time = (String) sessionData.get("start_time");
+                                        String date = (String) sessionData.get("date");
+                                        String classroom = (String) sessionData.get("classroom");
 
-                                    String classroom = (String) map.get("classroom");
-
-                                    Schedule scheduleItem = new Schedule(time, subject, classroom, date);
-                                    scheduleList.add(scheduleItem);
+                                        Schedule scheduleItem = new Schedule(time, subject, classroom, date);
+                                        scheduleList.add(scheduleItem);
+                                    }
                                 }
-                                scheduleAdapter.notifyDataSetChanged();
-                            } else {
-                                Log.d(TAG, "schedule_sessions array is null or empty");
-                                Toast.makeText(getContext(), "Không có lịch học.", Toast.LENGTH_SHORT).show();
                             }
+
+                            if (scheduleList.isEmpty()) {
+                                Toast.makeText(getContext(), "Không có lịch học cho môn của bạn.", Toast.LENGTH_SHORT).show();
+                            }
+                            scheduleAdapter.notifyDataSetChanged();
+
                         } else {
-                            Log.d(TAG, "No such document for class: " + classId);
+                            Log.d("ScheduleFragment", "Không có tài liệu lịch học cho lớp: " + classId);
                             Toast.makeText(getContext(), "Không tìm thấy lịch học cho lớp này.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Log.e(TAG, "Error getting documents: ", task.getException());
-                        Toast.makeText(getContext(), "Lỗi khi tải dữ liệu.", Toast.LENGTH_SHORT).show();
+                        Log.e("ScheduleFragment", "Lỗi khi lấy tài liệu lịch học: ", task.getException());
+                        Toast.makeText(getContext(), "Lỗi khi tải dữ liệu lịch học.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
