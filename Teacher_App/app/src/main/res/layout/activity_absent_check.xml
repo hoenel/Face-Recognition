@@ -25,12 +25,30 @@
             android:textColor="@android:color/white"
             android:textSize="20sp" />
     </LinearLayout>
-    <Button
-        android:id="@+id/btnRefresh"
-        android:layout_width="wrap_content"
+
+    <!-- Hàng chứa 2 nút -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Làm mới"
-        android:layout_margin="12dp" />
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnRefresh"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Làm mới" />
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Quay lại trang chủ" />
+    </LinearLayout>
 
     <!-- Danh sách sinh viên -->
     <androidx.recyclerview.widget.RecyclerView
