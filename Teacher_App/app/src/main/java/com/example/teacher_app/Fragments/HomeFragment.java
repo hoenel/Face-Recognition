@@ -1,6 +1,7 @@
 package com.example.teacher_app.Fragments;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.teacher_app.AbsentCheckActivity;
+import com.example.teacher_app.AttendanceStatusActivity;
 import com.example.teacher_app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,6 +35,7 @@ public class HomeFragment extends Fragment {
     FirebaseFirestore db;
     FirebaseAuth mAuth;
 
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -44,6 +48,8 @@ public class HomeFragment extends Fragment {
 
         LinearLayout btn_schedule = view.findViewById(R.id.btn_schedule);
         LinearLayout btn_news = view.findViewById(R.id.btn_news);
+        LinearLayout btn_absent = view.findViewById(R.id.btn_absent);
+        LinearLayout btn_attendance = view.findViewById(R.id.btn_attendance);
 
 
         tvTime = view.findViewById(R.id.tvTime);
@@ -87,6 +93,25 @@ public class HomeFragment extends Fragment {
                 fragmentTransaction.commit();
             }
         });
+
+        btn_absent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AbsentCheckActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btn_attendance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AttendanceStatusActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
 
 
         return view;

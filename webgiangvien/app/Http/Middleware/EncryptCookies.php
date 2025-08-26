@@ -2,16 +2,20 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
+use Closure;
+use Illuminate\Http\Request;
 
-class EncryptCookies extends Middleware
+class EncryptCookies
 {
     /**
-     * The names of the cookies that should not be encrypted.
+     * Handle an incoming request.
      *
-     * @var array<int, string>
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    protected $except = [
-        //
-    ];
+    public function handle(Request $request, Closure $next)
+    {
+        return $next($request);
+    }
 }
