@@ -25,6 +25,12 @@
             android:textColor="@android:color/white"
             android:textSize="20sp" />
     </LinearLayout>
+    <Button
+        android:id="@+id/btnRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Làm mới"
+        android:layout_margin="12dp" />
 
     <!-- Danh sách sinh viên -->
     <androidx.recyclerview.widget.RecyclerView
