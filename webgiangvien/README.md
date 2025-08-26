@@ -1,66 +1,201 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hệ thống Quản trị Điểm danh HTD - Face Recognition
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Giới thiệu
 
-## About Laravel
+Hệ thống quản trị web cho việc quản lý điểm danh bằng nhận diện khuôn mặt tại trường Đại học Thuỷ Lợi. Được xây dựng bằng Laravel với giao diện hiện đại và thân thiện với người dùng.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tính năng chính
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🏠 Trang chủ (Dashboard)
+- Tổng quan hệ thống với các thống kê quan trọng
+- Biểu đồ hoạt động điểm danh trong tuần  
+- Thông báo và cập nhật mới nhất
+- Lịch học hôm nay với trạng thái điểm danh
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👥 Quản lý tài khoản
+- Thêm, sửa, xóa tài khoản sinh viên, giảng viên
+- Phân quyền theo vai trò (Admin, Giảng viên, Sinh viên)
+- Tìm kiếm và lọc theo nhiều tiêu chí
+- Quản lý trạng thái hoạt động
 
-## Learning Laravel
+### 📚 Quản lý môn học  
+- Tạo và quản lý danh sách môn học
+- Thông tin chi tiết: mã môn, tên môn, số tín chỉ, ngành học
+- Phân loại theo khoa và chuyên ngành
+- Mô tả chi tiết môn học
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🎓 Quản lý lớp học phần
+- Tạo lớp học phần cho từng môn học
+- Phân công giảng viên giảng dạy
+- Quản lý sĩ số và thông tin lớp học
+- Thời gian biểu và phòng học
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 📅 Lịch học & Điểm danh
+- Xem lịch học theo ngày/tuần/tháng
+- Trạng thái điểm danh real-time
+- Lọc theo trạng thái: Đã điểm danh, Chưa điểm danh
+- Thống kê tỷ lệ tham gia
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🔍 Kiểm tra dữ liệu
+- Kiểm tra tính toàn vẹn dữ liệu hệ thống
+- Phát hiện lớp học thiếu sinh viên/giảng viên
+- Báo cáo lịch học bị trùng
+- Công cụ sửa lỗi tự động
 
-## Laravel Sponsors
+### 📊 Xuất báo cáo
+- Tạo báo cáo điểm danh theo lớp/thời gian
+- Hỗ trợ nhiều định dạng: Excel, PDF, CSV
+- Báo cáo có sẵn (tuần, tháng, học kỳ)
+- Lịch sử xuất báo cáo
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Giao diện
 
-### Premium Partners
+### 🎨 Thiết kế hiện đại
+- Sử dụng Bootstrap 5 với custom CSS
+- Giao diện responsive, tương thích mọi thiết bị
+- Màu sắc chuyên nghiệp với gradient đẹp mắt
+- Animation mượt mà, trải nghiệm người dùng tốt
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+### 🌟 Tính năng UI/UX
+- Sidebar navigation với icons trực quan
+- Tables với sorting, filtering, pagination
+- Modal forms với validation real-time
+- Loading states và feedback người dùng
+- Dark/Light theme support
+- Mobile-first responsive design
 
-## Contributing
+## Cấu trúc dự án
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+laravel/
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   └── app.blade.php        # Layout chính
+│       ├── auth/
+│       │   └── login.blade.php      # Trang đăng nhập
+│       ├── dashboard.blade.php      # Trang chủ
+│       ├── accounts/
+│       │   └── index.blade.php      # Quản lý tài khoản
+│       ├── subjects/
+│       │   └── index.blade.php      # Quản lý môn học
+│       ├── classes/
+│       │   └── index.blade.php      # Quản lý lớp học phần
+│       ├── schedules/
+│       │   └── index.blade.php      # Lịch học & điểm danh
+│       ├── data-check.blade.php     # Kiểm tra dữ liệu
+│       └── reports/
+│           └── index.blade.php      # Xuất báo cáo
+├── public/
+│   ├── css/
+│   │   └── custom.css              # CSS tùy chỉnh
+│   └── js/
+│       └── app.js                  # JavaScript chính
+└── routes/
+    └── web.php                     # Định nghĩa routes
+```
 
-## Code of Conduct
+## Cài đặt và chạy
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Yêu cầu hệ thống
+- PHP >= 8.0
+- Composer
+- Laravel >= 9.0
+- MySQL/PostgreSQL
+- Node.js & NPM (optional)
 
-## Security Vulnerabilities
+### Hướng dẫn cài đặt
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Clone repository**
+```bash
+git clone <repository-url>
+cd Web_QTV/laravel
+```
 
-## License
+2. **Cài đặt dependencies**
+```bash
+composer install
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3. **Cấu hình environment**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+4. **Cấu hình database trong file .env**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=htd_attendance
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+5. **Chạy migrations**
+```bash
+php artisan migrate
+```
+
+6. **Seed dữ liệu mẫu (optional)**
+```bash
+php artisan db:seed
+```
+
+7. **Khởi động server**
+```bash
+php artisan serve
+```
+
+8. **Truy cập ứng dụng**
+```
+http://localhost:8000
+```
+
+## Sử dụng
+
+### Đăng nhập
+- Truy cập trang chủ sẽ tự động chuyển hướng đến trang đăng nhập
+- Sử dụng email và mật khẩu được cấp để đăng nhập
+- Sau khi đăng nhập thành công, hệ thống chuyển đến Dashboard
+
+### Navigation
+- Sử dụng sidebar để điều hướng giữa các trang
+- Trên mobile, nhấn icon menu để mở/đóng sidebar
+- Active page được highlight rõ ràng
+
+### Quản lý dữ liệu
+- Sử dụng nút "Thêm" để tạo mới
+- Click vào nút "Sửa" để chỉnh sửa
+- Xác nhận trước khi xóa dữ liệu
+- Sử dụng bộ lọc để tìm kiếm nhanh
+
+### Xuất báo cáo
+- Chọn lớp học phần và khoảng thời gian
+- Chọn định dạng file mong muốn
+- Click "Xuất báo cáo" để tải xuống
+
+## Công nghệ sử dụng
+
+### Backend
+- **Laravel 9+**: PHP Framework chính
+- **MySQL**: Cơ sở dữ liệu
+- **Blade Templates**: Template engine
+
+### Frontend  
+- **Bootstrap 5**: CSS Framework
+- **jQuery**: JavaScript library
+- **Font Awesome**: Icons
+- **Chart.js**: Biểu đồ thống kê
+- **SweetAlert2**: Modal alerts đẹp
+
+### Styling
+- **Custom CSS**: Tùy chỉnh giao diện
+- **CSS Grid & Flexbox**: Layout responsive
+- **CSS Animations**: Hiệu ứng mượt mà
+- **Custom Scrollbar**: Thanh cuộn đẹp
+
+---
+
+© 2025 HTD Face Recognition System. All rights reserved.

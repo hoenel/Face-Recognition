@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.teacher_app.AbsentCheckActivity;
+import com.example.teacher_app.AttendanceStatusActivity;
 import com.example.teacher_app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -48,6 +49,8 @@ public class HomeFragment extends Fragment {
         LinearLayout btn_schedule = view.findViewById(R.id.btn_schedule);
         LinearLayout btn_news = view.findViewById(R.id.btn_news);
         LinearLayout btn_absent = view.findViewById(R.id.btn_absent);
+        LinearLayout btn_attendance = view.findViewById(R.id.btn_attendance);
+
 
         tvTime = view.findViewById(R.id.tvTime);
         tvDate = view.findViewById(R.id.tvDate);
@@ -98,6 +101,18 @@ public class HomeFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        btn_attendance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AttendanceStatusActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+
 
         return view;
     }
