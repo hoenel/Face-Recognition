@@ -90,54 +90,140 @@ Dự án sử dụng **Route-Based Architecture** thay vì MVC truyền thống:
 Firestore Collections:
 ├── users/                   # Quản trị viên, giảng viên
 │   └── {userId}/
-│       ├── name: string
-│       ├── email: string
-│       └── role: string
+│       ├── email: "giangyien123@gmail.com"
+│       ├── name: "Trần Quỳnh Diệp"
+│       └── teacher_id: "0001062753"
 ├── students/                # Sinh viên
-│   └── {studentId}/
-│       ├── name: string
-│       ├── email: string
-│       ├── class_id: string
-│       └── field_of_study: string
+│   └── {studentId}/         # ID: MSSV (VD: 2151062753, 2151062755...)
+│       ├── name: "Đặng Hải Sơn"
+│       ├── class_id: "63CNTT.VA"
+│       ├── field_of_study: "Công nghệ thông tin"
+│       ├── hometown: "Hà Nội"
+│       ├── date_of_birth: "02/04/2003"
+│       └── course_enrollments: ["CSE205, CSE204, MATH133"]
 ├── courses/                 # Môn học
-│   └── {courseId}/
-│       ├── course_code: string
-│       ├── course_name: string
-│       ├── credit: integer
-│       └── teacher_name: string
+│   └── {courseId}/          # ID: Mã môn (VD: CSE111, MATH111...)
+│       ├── course_code: "CSE111"
+│       ├── course_name: "Nhập môn lập trình"
+│       ├── credit: 3
+│       └── teacher_name: "Trương Xuân Nam"
 ├── classes/                 # Lớp học phần
-│   └── {classId}/
-│       ├── class_name: string
-│       ├── teacher_id: string
-│       └── student_ids: array
+│   └── {classId}/           # ID: Mã lớp (VD: 63CNTT.NB, 63CNTT.VA...)
+│       ├── class_name: "K63 Công nghệ thông tin Việt-Nhật"
+│       ├── teacher_id: "TXT-123"
+│       └── student_ids: ["2151062753", "2151062894"]
+├── teachers/                # Giảng viên
+│   └── {teacherId}/         # ID: Mã GV (VD: 0001062733, 0001062753...)
+│       ├── name: "Kiều Tuấn Dũng"
+│       ├── class_id: "63CNTT.NB"
+│       ├── course_code: "CSE441"
+│       ├── hometown: "Hà Nội"
+│       └── date_of_birth: "26/08/1990"
 └── schedules/               # Lịch học
-    └── {scheduleId}/
-        ├── course_code: string
-        ├── course_name: string
-        ├── date: string
-        ├── start_time: string
-        └── schedule_sessions: array
+    └── {scheduleId}/        # ID: Theo lớp (VD: 63CNTT.NB, 63CNTT.VA...)
+        ├── course_code: "MATH111"
+        ├── course_name: "Giải tích hàm một biến(MATH111)"
+        ├── date: "Thứ 2, ngày 4/8/2025"
+        ├── start_time: "9:45"
+        └── schedule_sessions: [
+            {
+                class_id: "63CNTT.NB",
+                classroom: "301-A2",
+                course_code: "MATH111",
+                course_name: "Giải tích hàm một biến(MATH111)",
+                date: "Thứ 2, ngày 4/8/2025",
+                start_time: "9:45"
+            },
+            {
+                class_id: "63CNTT.NB", 
+                classroom: "208-B5",
+                course_code: "CSE441",
+                course_name: "Phát triển ứng dụng cho các thiết bị di động(CSE441)",
+                date: "Thứ 3, ngày 5/8/2025",
+                start_time: "7:00"
+            }
+        ]
 ```
+
+### 4.2 Đặc điểm Database Design
+- **Document IDs có ý nghĩa**: Sử dụng MSSV, mã môn, mã lớp làm ID
+- **Nested Arrays**: `schedule_sessions` chứa multiple sessions cho mỗi lớp
+- **Vietnamese Date Format**: "Thứ X, ngày d/m/Y" 
+- **Cross-references**: `student_ids`, `teacher_id`, `course_code` liên kết collections
+- **Flexible Schema**: Mỗi document có thể có fields khác nhau
+- **Real Student Data**: MSSV format 21510XXXXX (năm 2021, khoa 51)
+- **Course Codes**: 
+  - **CSE**: Computer Science Engineering
+  - **MATH**: Toán học
+  - **Numbering**: 1XX (cơ bản), 2XX-4XX (nâng cao)
 
 ### 4.2 FirebaseService Class
 ```php
 class FirebaseService {
     // CRUD Operations
-    - getCourses()      # Lấy danh sách môn học
-    - createCourse()    # Tạo môn học mới
-    - getClasses()      # Lấy danh sách lớp học phần
-    - createClass()     # Tạo lớp học phần mới
-    - getStudents()     # Lấy danh sách sinh viên
-    - createStudent()   # Tạo sinh viên mới
-    - getUsers()        # Lấy danh sách users
-    - createUser()      # Tạo user mới
-    - getSchedules()    # Lấy lịch học
+    - getCourses()          # Lấy danh sách môn học từ courses collection
+    - createCourse()        # Tạo môn học mới với course_code làm document ID
+    - getClasses()          # Lấy danh sách lớp học phần từ classes collection  
+    - createClass()         # Tạo lớp học phần với class_name làm document ID
+    - getStudents()         # Lấy danh sách sinh viên từ students collection
+    - createStudent()       # Tạo sinh viên mới với MSSV làm document ID
+    - getUsers()            # Lấy danh sách users từ users collection
+    - createUser()          # Tạo user mới (admin/teacher)
+    - getSchedules()        # Lấy lịch học từ schedules collection với nested sessions
+    - getTeachers()         # Lấy danh sách giảng viên từ teachers collection
     
     // Helper Methods
-    - parseFirestoreDocument()  # Parse dữ liệu Firestore
-    - calculateEndTime()        # Tính giờ kết thúc
-    - getDepartmentFromCourseCode()  # Xác định khoa
+    - parseFirestoreDocument()      # Parse nested Firestore document structure
+    - calculateEndTime()            # Tính giờ kết thúc từ start_time + duration
+    - getDepartmentFromCourseCode() # Xác định khoa từ mã môn (CSE->CNTT, MATH->Toán)
+    - parseVietnameseDate()         # Parse "Thứ X, ngày d/m/Y" format
+    - validateMSSV()                # Validate MSSV format 21510XXXXX
+    - getClassStudentCount()        # Đếm số sinh viên trong student_ids array
 }
+```
+
+### 4.3 Dữ liệu Thực tế (Real Data Examples)
+
+**Classes Collection:**
+- `63CNTT.NB`: K63 Công nghệ thông tin Việt-Nhật 
+- `63CNTT.VA`: Lớp Công nghệ thông tin khác
+- `63TKPM1`, `63TKPM2`: Các lớp Thiết kế phần mềm
+
+**Students Collection:**
+- MSSV format: `21510XXXXX` (năm nhập học 2021, khoa 51)
+- Examples: `2151062753`, `2151062755`, `2151062894`
+- Field of study: "Công nghệ thông tin"
+- Hometown: "Hà Nội", "Hải Phòng", etc.
+
+**Courses Collection:**
+- **CSE (Computer Science Engineering):**
+  - `CSE111`: Nhập môn lập trình (3 tín chỉ)
+  - `CSE441`: Phát triển ứng dụng cho các thiết bị di động
+  - `CSE485`: Khóa luận tốt nghiệp
+- **MATH (Mathematics):**
+  - `MATH111`: Giải tích hàm một biến
+  - `MATH122`, `MATH254`, `MATH533`: Các môn toán khác
+
+**Teachers Collection:**
+- Teacher IDs: `0001062733`, `0001062753`, `0001062764`
+- Names: "Kiều Tuấn Dũng", "Trương Xuân Nam"
+- Assigned to specific classes và courses
+
+**Schedules Collection:**
+- Vietnamese date format: "Thứ 2, ngày 4/8/2025"
+- Time format: "9:45", "7:00" (24h format)
+- Classroom format: "301-A2", "208-B5" (Phòng-Tòa nhà)
+- Nested schedule_sessions array với multiple môn học per day
+
+### 4.4 Data Relationships
+```
+users ←→ teachers (via teacher_id)
+teachers → classes (via class_id) 
+teachers → courses (via course_code)
+classes → students (via student_ids array)
+students → courses (via course_enrollments array)
+schedules → classes (via class_id in schedule_sessions)
+schedules → courses (via course_code in schedule_sessions)
 ```
 
 ---
@@ -280,9 +366,37 @@ Xuất Báo cáo → Generate Reports
 ### 8.1 Service Layer Pattern
 - **FirebaseService**: Centralized Firebase operations
 - **Separation of Concerns**: Database logic tách khỏi route logic
-- **Reusability**: Methods có thể sử dụng ở nhiều route
+### 4.3 FirebaseService Class
+```php
+class FirebaseService {
+    // CRUD Operations
+    - getCourses()          # Lấy danh sách môn học từ courses collection
+    - createCourse()        # Tạo môn học mới với course_code làm document ID
+    - getClasses()          # Lấy danh sách lớp học phần từ classes collection  
+    - createClass()         # Tạo lớp học phần với class_name làm document ID
+    - getStudents()         # Lấy danh sách sinh viên từ students collection
+    - createStudent()       # Tạo sinh viên mới với MSSV làm document ID
+    - getUsers()            # Lấy danh sách users từ users collection
+    - createUser()          # Tạo user mới (admin/teacher)
+    - getSchedules()        # Lấy lịch học từ schedules collection với nested sessions
+    - getTeachers()         # Lấy danh sách giảng viên từ teachers collection
+    
+    // Helper Methods
+    - parseFirestoreDocument()      # Parse nested Firestore document structure
+    - calculateEndTime()            # Tính giờ kết thúc từ start_time + duration
+    - getDepartmentFromCourseCode() # Xác định khoa từ mã môn (CSE->CNTT, MATH->Toán)
+    - parseVietnameseDate()         # Parse "Thứ X, ngày d/m/Y" format
+    - validateMSSV()                # Validate MSSV format 21510XXXXX
+    - getClassStudentCount()        # Đếm số sinh viên trong student_ids array
+}
 
-### 8.2 DRY Principle
+// Example Usage:
+$firebaseService = new FirebaseService();
+$schedules = $firebaseService->getSchedules(); // Lấy tất cả lịch học
+$todaySchedules = array_filter($schedules, function($schedule) {
+    return $schedule['date'] === 'Thứ 2, ngày 26/8/2025';
+});
+```
 - **Layout Template**: Tái sử dụng `layouts/app.blade.php`
 - **Common Components**: Alert messages, modals, tables
 - **Helper Functions**: parseFirestoreDocument(), calculateEndTime()
@@ -399,7 +513,283 @@ User Input → GET Parameters → Route Logic → Firebase Query → Filtered Re
 
 ---
 
-## 14. FUTURE ENHANCEMENTS
+## 14. ĐỊNH HƯỚNG TƯƠNG LAI
+
+### 14.1 Các File Đã Tạo Nhưng Chưa Sử Dụng
+
+#### 14.1.1 Routes Files (Chưa phát triển)
+**File**: `routes/api.php`
+- **Trạng thái**: ⚪ Chưa sử dụng (chỉ có default Sanctum route)
+- **Mục đích tương lai**: 
+  - RESTful API endpoints cho mobile app
+  - Face recognition API integration
+  - External system communication
+  - JSON responses cho third-party services
+- **Kế hoạch implementation**:
+```php
+// Planned API routes
+Route::prefix('api')->group(function () {
+    Route::post('/attendance/face-recognition', 'AttendanceController@faceRecognition');
+    Route::get('/schedules/today', 'ScheduleController@today');
+    Route::post('/students/checkin', 'AttendanceController@checkin');
+    Route::get('/reports/export/{type}', 'ReportController@export');
+});
+```
+
+**File**: `routes/channels.php`
+- **Trạng thái**: ⚪ Chưa sử dụng (chỉ có default broadcast channel)
+- **Mục đích tương lai**:
+  - Real-time attendance notifications
+  - Live dashboard updates
+  - Teacher-student communication channels
+  - Instant schedule changes broadcast
+- **Kế hoạch implementation**:
+```php
+// Planned broadcast channels
+Broadcast::channel('attendance.{classId}', function ($user, $classId) {
+    return $user->hasAccessToClass($classId);
+});
+
+Broadcast::channel('schedule.updates', function ($user) {
+    return $user->role === 'admin' || $user->role === 'teacher';
+});
+```
+
+**File**: `routes/console.php`
+- **Trạng thái**: ⚪ Chưa sử dụng (chỉ có default "inspire" command)
+- **Mục đích tương lai**:
+  - Automated daily/weekly reports
+  - Data cleanup và maintenance tasks
+  - Firebase backup operations
+  - Scheduled notifications
+- **Kế hoạch implementation**:
+```php
+// Planned console commands
+Artisan::command('reports:daily', function () {
+    // Generate daily attendance reports
+})->describe('Generate daily attendance reports');
+
+Artisan::command('firebase:backup', function () {
+    // Backup Firebase data to local storage
+})->describe('Backup Firebase collections');
+
+Artisan::command('cleanup:old-sessions', function () {
+    // Clean up old schedule sessions
+})->describe('Clean up expired schedule data');
+```
+
+#### 14.1.2 Potential New Controllers (Chưa tạo)
+**Folder**: `app/Http/Controllers/` (hiện tại trống - logic trong routes)
+- **AttendanceController**: Xử lý face recognition và điểm danh
+- **ReportController**: Advanced report generation
+- **NotificationController**: Push notifications
+- **AnalyticsController**: Statistics và charts
+
+#### 14.1.3 Middleware Classes (Chưa phát triển)
+**Folder**: `app/Http/Middleware/`
+- **FaceRecognitionMiddleware**: Verify face recognition data
+- **RoleBasedAccess**: Advanced role-based permissions
+- **ApiRateLimit**: API request throttling
+
+### 14.2 Chức Năng Chưa Phát Triển
+
+#### 14.2.1 Face Recognition Integration
+**Trạng thái**: 🔄 Planned - Core feature chưa implement
+**Components cần phát triển**:
+- **AI Model Integration**: Python/TensorFlow face recognition
+- **Camera Interface**: WebRTC camera access
+- **Image Processing**: Face detection và matching
+- **Attendance Recording**: Automatic check-in/check-out
+- **Files sẽ tạo**:
+  - `resources/js/face-recognition.js`
+  - `app/Services/FaceRecognitionService.php`
+  - `public/assets/models/` (AI model files)
+
+#### 14.2.2 Real-time Features
+**Trạng thái**: 🔄 Planned - WebSocket chưa setup
+**Components cần phát triển**:
+- **Live Dashboard**: Real-time attendance updates
+- **Push Notifications**: Instant alerts
+- **Live Chat**: Teacher-student communication
+- **Files sẽ tạo**:
+  - `resources/js/websocket.js`
+  - `app/Events/AttendanceRecorded.php`
+  - `app/Listeners/SendAttendanceNotification.php`
+
+#### 14.2.3 Mobile Application
+**Trạng thái**: 🔄 Planned - Separate mobile project
+**Technology Stack**:
+- **React Native** hoặc **Flutter**
+- **API-based communication** với Laravel backend
+- **Face recognition camera** integration
+- **Offline capability** cho unstable networks
+- **Files structure** (separate repository):
+```
+mobile-app/
+├── src/
+│   ├── screens/
+│   ├── components/
+│   ├── services/
+│   └── utils/
+├── assets/
+└── config/
+```
+
+#### 14.2.4 Advanced Analytics
+**Trạng thái**: 🔄 Planned - Data visualization chưa có
+**Components cần phát triển**:
+- **Chart.js Integration**: Attendance trends
+- **Dashboard Widgets**: Key performance indicators
+- **Predictive Analytics**: Attendance predictions
+- **Export Options**: PDF, Excel reports
+- **Files sẽ tạo**:
+  - `resources/js/charts.js`
+  - `resources/views/analytics/`
+  - `app/Services/AnalyticsService.php`
+
+### 14.3 Database Extensions (Firebase Collections)
+
+#### 14.3.1 Collections Chưa Tạo
+**attendance/** (Chưa có - core feature)
+```
+attendance/
+└── {attendanceId}/
+    ├── student_id: "2151062753"
+    ├── class_id: "63CNTT.NB"
+    ├── course_code: "CSE441"
+    ├── check_in_time: "2025-08-26T09:45:00Z"
+    ├── check_out_time: "2025-08-26T11:30:00Z"
+    ├── status: "present|absent|late"
+    ├── face_recognition_confidence: 0.95
+    └── location: "301-A2"
+```
+
+**notifications/** (Chưa có)
+```
+notifications/
+└── {notificationId}/
+    ├── user_id: "target_user_id"
+    ├── type: "attendance|schedule|announcement"
+    ├── title: "Notification title"
+    ├── message: "Notification content"
+    ├── read: false
+    └── created_at: "2025-08-26T10:00:00Z"
+```
+
+**face_templates/** (Chưa có - AI feature)
+```
+face_templates/
+└── {studentId}/
+    ├── template_data: "base64_encoded_face_features"
+    ├── confidence_threshold: 0.85
+    ├── last_updated: "2025-08-26T10:00:00Z"
+    └── training_images_count: 5
+```
+
+### 14.4 Third-party Integrations (Chưa có)
+
+#### 14.4.1 Email Service
+**Service**: SendGrid hoặc Amazon SES
+**Mục đích**: Automated reports, notifications
+**Files sẽ tạo**:
+- `app/Services/EmailService.php`
+- `resources/views/emails/`
+
+#### 14.4.2 SMS Service
+**Service**: Twilio hoặc Vonage
+**Mục đích**: Emergency notifications, attendance alerts
+**Files sẽ tạo**:
+- `app/Services/SmsService.php`
+- `config/sms.php`
+
+#### 14.4.3 Cloud Storage
+**Service**: AWS S3 hoặc Google Cloud Storage
+**Mục đích**: Face recognition images, backup data
+**Files sẽ tạo**:
+- `app/Services/CloudStorageService.php`
+- `config/cloud-storage.php`
+
+### 14.5 Infrastructure Improvements (Chưa implement)
+
+#### 14.5.1 Caching System
+**Technology**: Redis
+**Benefits**: Faster data retrieval, reduced Firebase calls
+**Implementation**:
+- Cache frequently accessed schedules
+- Store session data in Redis
+- Cache computed analytics
+
+#### 14.5.2 Queue System
+**Technology**: Laravel Queues + Redis
+**Benefits**: Background processing, better performance
+**Use cases**:
+- Face recognition processing
+- Email/SMS sending
+- Report generation
+- Data synchronization
+
+#### 14.5.3 Monitoring & Logging
+**Tools**: Laravel Telescope, Sentry
+**Benefits**: Error tracking, performance monitoring
+**Features**:
+- Real-time error alerts
+- Performance bottleneck detection
+- User activity tracking
+
+### 14.6 Timeline Dự Kiến
+
+#### Phase 1 (1-2 tháng): Core Features
+- ✅ **Web interface** (Đã hoàn thành)
+- 🔄 **Face recognition integration**
+- 🔄 **Basic attendance recording**
+
+#### Phase 2 (2-3 tháng): Enhanced Features  
+- 🔄 **Real-time notifications** (channels.php)
+- 🔄 **Advanced analytics dashboard**
+- 🔄 **API development** (api.php)
+
+#### Phase 3 (3-4 tháng): Mobile & Automation
+- 🔄 **Mobile application**
+- 🔄 **Automated reporting** (console.php)
+- 🔄 **Third-party integrations**
+
+#### Phase 4 (4-6 tháng): Optimization & Scale
+- 🔄 **Caching implementation**
+- 🔄 **Queue system setup**
+- 🔄 **Performance optimization**
+- 🔄 **Production deployment**
+
+### 14.7 Resource Requirements
+
+#### 14.7.1 Technical Skills Needed
+- **AI/ML Engineer**: Face recognition implementation
+- **Mobile Developer**: React Native/Flutter
+- **DevOps Engineer**: Production deployment
+- **UI/UX Designer**: Mobile app design
+
+#### 14.7.2 Infrastructure Costs
+- **Firebase Firestore**: Tăng usage khi có nhiều attendance records
+- **Cloud Storage**: Lưu trữ face recognition images
+- **Server Resources**: Để chạy AI models
+- **Third-party APIs**: Email, SMS services
+
+### 14.8 Risk Assessment & Mitigation
+
+#### 14.8.1 Technical Risks
+- **Face Recognition Accuracy**: Test extensively, có fallback manual
+- **Firebase Limitations**: Monitor usage, có backup plan
+- **Mobile Performance**: Optimize image processing
+- **Security Concerns**: Implement proper face data encryption
+
+#### 14.8.2 Business Risks
+- **User Adoption**: Training và user education
+- **Data Privacy**: Comply với GDPR/local regulations
+- **Cost Overrun**: Monitor infrastructure costs closely
+- **Competition**: Focus on unique features cho trường Thuỷ lợi
+
+---
+
+## 15. PLANNED FEATURES
 
 ### 14.1 Planned Features
 - **Face Recognition Integration**: Kết nối với AI model
@@ -407,15 +797,23 @@ User Input → GET Parameters → Route Logic → Firebase Query → Filtered Re
 - **Mobile App**: React Native hoặc Flutter
 - **Advanced Analytics**: Charts và dashboard
 
-### 14.2 Technical Improvements
-- **API Layer**: RESTful API cho mobile
-- **Caching**: Redis cho performance
-- **Queue System**: Background job processing
-- **Unit Testing**: PHPUnit test suite
+## 15. PLANNED FEATURES (Summary)
+
+### 15.1 Core Integrations
+- **Face Recognition**: AI-powered attendance system
+- **Real-time Updates**: WebSocket-based live notifications  
+- **Mobile App**: Cross-platform attendance application
+- **Advanced Analytics**: Data visualization và insights
+
+### 15.2 Technical Infrastructure
+- **API Layer**: RESTful endpoints cho mobile integration
+- **Background Jobs**: Queue-based processing system
+- **Caching**: Redis-based performance optimization
+- **Monitoring**: Error tracking và performance analysis
 
 ---
 
-## 15. DEPLOYMENT NOTES
+## 16. DEPLOYMENT NOTES
 
 ### 15.1 Production Requirements
 - **PHP 8.0+** với required extensions
@@ -437,7 +835,7 @@ FIREBASE_PROJECT_ID=your-project-id
 
 ---
 
-## 16. KỦ LUẬN
+## 17. KẾT LUẬN
 
 Dự án **Web_QTV** thể hiện một cách tiếp cận hiện đại cho việc quản lý giáo dục với:
 
@@ -452,6 +850,5 @@ Hệ thống sẵn sàng cho việc mở rộng thêm tính năng nhận diện 
 
 ---
 
-**Tác giả**: [Tên của bạn]  
-**Ngày**: 25/08/2025  
-**Phiên bản**: 1.0
+**Tác giả**: Lê Hoàn
+**Ngày**: 26/08/2025
