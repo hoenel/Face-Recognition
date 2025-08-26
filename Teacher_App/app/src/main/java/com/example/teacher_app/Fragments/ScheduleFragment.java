@@ -104,11 +104,22 @@ public class ScheduleFragment extends Fragment {
                 .addOnSuccessListener(teacherDocument -> {
                     if (teacherDocument.exists()) {
                         String classId = teacherDocument.getString("class_id");
-                        String teacherCourseCode = teacherDocument.getString("course_code");
-                        Log.d(TAG, "Step 4: Found teacher document. class_id = '" + classId + "', course_code = '" + teacherCourseCode + "'");
+                        String teacherCourseCodesString = teacherDocument.getString("course_code"); // Tên biến rõ ràng hơn
+                        Log.d(TAG, "Step 4: Found teacher document. class_id = '" + classId + "', course_codes = '" + teacherCourseCodesString + "'");
 
-                        if (classId != null && !classId.isEmpty() && teacherCourseCode != null && !teacherCourseCode.isEmpty()) {
-                            fetchAndFilterSchedules(classId, teacherCourseCode);
+                        if (classId != null && !classId.isEmpty() && teacherCourseCodesString != null && !teacherCourseCodesString.isEmpty()) {
+
+                            String[] courseCodesArray = teacherCourseCodesString.split(",");
+
+
+                            List<String> teacherCourses = new ArrayList<>();
+                            for (String code : courseCodesArray) {
+                                teacherCourses.add(code.trim());
+                            }
+
+                            fetchAndFilterSchedules(classId, teacherCourses);
+
+
                         } else {
                             Log.e(TAG, "class_id or course_code is null or empty in teachers collection.");
                             Toast.makeText(getContext(), "Hồ sơ giáo viên thiếu thông tin lớp hoặc môn học.", Toast.LENGTH_LONG).show();
@@ -124,7 +135,7 @@ public class ScheduleFragment extends Fragment {
                 });
     }
 
-    private void fetchAndFilterSchedules(String classId, String teacherCourseCode) {
+    private void fetchAndFilterSchedules(String classId, List<String> teacherCourses) {
         db.collection("schedules").document(classId).get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -132,17 +143,13 @@ public class ScheduleFragment extends Fragment {
                         if (document != null && document.exists()) {
                             scheduleList.clear();
 
-                            // Lấy ra MẢNG từ trường "schedule_sessions"
                             List<Map<String, Object>> sessionsList = (List<Map<String, Object>>) document.get("schedule_sessions");
 
                             if (sessionsList != null && !sessionsList.isEmpty()) {
-
                                 for (Map<String, Object> sessionData : sessionsList) {
                                     String sessionCourseCode = (String) sessionData.get("course_code");
 
-
-                                    if (sessionCourseCode != null && teacherCourseCode.trim().equalsIgnoreCase(sessionCourseCode.trim())) {
-
+                                    if (sessionCourseCode != null && teacherCourses.contains(sessionCourseCode.trim())) {
                                         String subject = (String) sessionData.get("course_name");
                                         String time = (String) sessionData.get("start_time");
                                         String date = (String) sessionData.get("date");
@@ -151,11 +158,12 @@ public class ScheduleFragment extends Fragment {
                                         Schedule scheduleItem = new Schedule(time, subject, classroom, date);
                                         scheduleList.add(scheduleItem);
                                     }
+                                    
                                 }
                             }
 
                             if (scheduleList.isEmpty()) {
-                                Toast.makeText(getContext(), "Không có lịch học cho môn của bạn.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Không có lịch học cho các môn của bạn.", Toast.LENGTH_SHORT).show();
                             }
                             scheduleAdapter.notifyDataSetChanged();
 
