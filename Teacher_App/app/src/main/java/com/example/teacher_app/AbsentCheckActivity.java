@@ -1,5 +1,6 @@
 package com.example.teacher_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -30,7 +31,7 @@ public class AbsentCheckActivity extends AppCompatActivity {
 
     private DatabaseReference ref;
 
-    Button btn_refresh;
+    Button btn_refresh, btn_back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,7 @@ public class AbsentCheckActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         btn_refresh = findViewById(R.id.btnRefresh);
+        btn_back = findViewById(R.id.btn_back);
 
         //Ghi dữ liệu ảo lên firebase
         ref = FirebaseDatabase.getInstance().getReference().child("Absents");
@@ -53,6 +55,12 @@ public class AbsentCheckActivity extends AppCompatActivity {
 
         btn_refresh.setOnClickListener(view -> {
             loadDataFromFirebase();
+        });
+
+        btn_back.setOnClickListener(view -> {
+            Intent intent = new Intent(AbsentCheckActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
