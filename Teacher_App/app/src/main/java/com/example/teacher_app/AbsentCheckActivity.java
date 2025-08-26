@@ -1,6 +1,8 @@
 package com.example.teacher_app;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.teacher_app.Adapters.AbsentAdapter;
 import com.example.teacher_app.Models.Absent;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +27,10 @@ public class AbsentCheckActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private AbsentAdapter adapter;
     private List<Absent> absentList;
+
+    private DatabaseReference ref;
+
+    Button btn_refresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +41,39 @@ public class AbsentCheckActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         absentList = new ArrayList<>();
-        absentList.add(new Absent("Nguyễn Văn A", "CNTT1", "Lập trình Java", "25/08/2025"));
-        absentList.add(new Absent("Trần Thị B", "CNTT2", "CSDL", "25/08/2025"));
 
         adapter = new AbsentAdapter(this, absentList);
         recyclerView.setAdapter(adapter);
+
+        btn_refresh = findViewById(R.id.btnRefresh);
+
+        //Ghi dữ liệu ảo lên firebase
+        ref = FirebaseDatabase.getInstance().getReference().child("Absents");
+        loadDataFromFirebase();
+
+        btn_refresh.setOnClickListener(view -> {
+            loadDataFromFirebase();
+        });
+    }
+
+    private void loadDataFromFirebase() {
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                absentList.clear();
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    Absent absent = data.getValue(Absent.class);
+                    if (absent != null) {
+                        absentList.add(absent);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e("Firebase", "Error: " + error.getMessage());
+            }
+        });
     }
 }
