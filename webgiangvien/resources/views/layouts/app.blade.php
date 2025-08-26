@@ -3,89 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <title>@yield('title', 'Hệ thống điểm danh - HTD')</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Nunito', sans-serif;
-            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
         }
+        
         .sidebar {
-            min-height: 100vh;
-            width: 220px;
-            background: linear-gradient(180deg, #243B55, #141E30);
-            color: #fff;
-            padding: 30px 10px 10px 10px;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
             position: fixed;
-            top: 0; left: 0;
-            border-radius: 0 20px 20px 0;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 220px;
+            background-color: #2c4a6b;
+            overflow-y: auto;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
         }
-        .sidebar h4 {
-            color: #ecf0f1;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 22px;
-            letter-spacing: 1px;
+        
+        .sidebar .logo {
+            padding: 20px 15px;
+            text-align: left;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .sidebar a {
-            display: block;
-            padding: 12px 18px;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 16px;
+        
+        .sidebar .logo h5 {
+            margin: 0;
             font-weight: 500;
-            transition: background 0.2s;
+            font-size: 1rem;
+            color: white;
         }
-        .sidebar a.active, .sidebar a:hover {
-            background: #2e3d5c;
-            color: #fff;
+        
+        .sidebar .nav-link {
+            color: #ffffff;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: block;
+            border: none;
+            background: none;
+            transition: background-color 0.2s;
+            font-size: 0.85rem;
         }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 16px;
+            margin-right: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .sidebar .nav-bottom {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 15px;
+        }
+        
         .main-content {
             margin-left: 220px;
-            padding: 40px 30px;
+            min-height: 100vh;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-user-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #374151;
+            color: #9CA3AF;
+            text-align: center;
+        }
+        
+        .nav-user-info .fa-user-circle {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
         }
     </style>
-    @yield('head')
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-2 sidebar">
-            <h4>HTD - Điểm Danh</h4>
-            <a href="{{ route('tongquan') }}" class="@yield('active-tongquan')">Tổng quan lớp học</a>
-            <a href="{{ route('lich') }}" class="@yield('active-lich')">Lịch giảng dạy</a>
-            <a href="{{ route('taobuoihoc') }}" class="@yield('active-taobuoihoc')">Tạo buổi học / điểm danh</a>
-            <a href="{{ route('trangthaidiemdanh') }}" class="@yield('active-trangthaidiemdanh')">Trạng thái điểm danh</a>
-            <a href="{{ route('thongkechuyencan') }}" class="@yield('active-thongkechuyencan')">Thống kê chuyên cần</a>
-            <a href="{{ route('xuatbaocao') }}" class="@yield('active-xuatbaocao')">Xuất báo cáo</a>
-            <a href="{{ route('dangnhap') }}" class="@yield('active-dangnhap')">Đăng xuất</a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h5>Admin - điểm danh</h5>
         </div>
-        <div class="col-10 main-content">
-            @yield('content')
-        </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                <i class="fas fa-tachometer-alt"></i>
+                Trang chủ
+            </a>
+            <a class="nav-link {{ request()->routeIs('accounts.*') ? 'active' : '' }}" href="{{ route('accounts.index') }}">
+                <i class="fas fa-users"></i>
+                Quản lý tài khoản
+            </a>
+            <a class="nav-link {{ request()->routeIs('subjects.*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                <i class="fas fa-book"></i>
+                Tổng quan lớp học
+            </a>
+            <a class="nav-link {{ request()->routeIs('classes.*') ? 'active' : '' }}" href="{{ route('classes.index') }}">
+                <i class="fas fa-chalkboard-teacher"></i>
+                tạo buổi học / điểm danh
+            </a>
+            <a class="nav-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}" href="{{ route('schedules.index') }}">
+                <i class="fas fa-calendar-alt"></i>
+                Lịch giảng dạy
+            </a>
+            <a class="nav-link {{ request()->routeIs('data-check') ? 'active' : '' }}" href="{{ route('data-check') }}">
+                <i class="fas fa-database"></i>
+                Kiểm tra dữ liệu
+            </a>
+            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
+                <i class="fas fa-chart-bar"></i>
+                Xuất báo cáo
+            </a>
+            <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="fas fa-sign-out-alt"></i>
+                Đăng xuất
+            </a>
+        </nav>
+        
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
     </div>
-</div>
-<script>
-const firebaseConfig = {
-    apiKey: "AIzaSyAygULXRSt9Nsqy2rb9Z4NNvh4Z4KvdK7c",
-    authDomain: "facerecognitionapp-f034d.firebaseapp.com",
-    databaseURL: "https://facerecognitionapp-f034d-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "facerecognitionapp-f034d",
-    storageBucket: "facerecognitionapp-f034d.firebasestorage.app",
-    messagingSenderId: "1042946521446",
-    appId: "1:1042946521446:web:02de5802629d422a5330a7"
-};
-firebase.initializeApp(firebaseConfig);
-</script>
-@yield('scripts')
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
+        @yield('content')
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @yield('scripts')
 </body>
 </html>
